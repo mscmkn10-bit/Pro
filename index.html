@@ -1,57 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Property Entry System</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Property Registration System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body {
-  font-family: Arial;
-  background: #f3f4f6;
+  font-family: Arial, sans-serif;
+  background: #f4f6f9;
   padding: 15px;
 }
+
+h2 {
+  text-align: center;
+}
+
 form {
-  background: #fff;
+  background: #ffffff;
   padding: 15px;
   border-radius: 8px;
-  max-width: 1100px;
+  max-width: 1200px;
   margin: auto;
 }
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 10px;
 }
+
 input {
   padding: 8px;
+  width: 100%;
 }
+
 button {
   padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
   background: #2563eb;
   color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
+  font-weight: bold;
 }
-button:hover { background:#1e40af; }
 
-.section {
-  max-width: 1100px;
-  margin: 20px auto;
+button:hover {
+  background: #1e40af;
+}
+
+.actions {
+  margin: 15px auto;
+  max-width: 1200px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   background: white;
+  font-size: 13px;
 }
+
 th, td {
   border: 1px solid #ccc;
   padding: 6px;
-  font-size: 13px;
+  text-align: left;
 }
-th { background: #e5e7eb; }
+
+th {
+  background: #e5e7eb;
+}
+
+.section {
+  max-width: 1200px;
+  margin: 20px auto;
+  overflow-x: auto;
+}
 
 select {
   padding: 8px;
@@ -61,7 +88,7 @@ select {
 
 <body>
 
-<h2 style="text-align:center;">Property Registration Entry</h2>
+<h2>Property Registration Entry System</h2>
 
 <form id="dataForm">
   <div class="grid">
@@ -93,24 +120,24 @@ select {
   <button type="submit">Save Entry</button>
 </form>
 
-<div class="section">
-  <h3>Saved Data (Browser)</h3>
+<div class="actions">
+  <button onclick="loadFromGoogle()">Load Data From Google Sheet</button>
   <select id="dateSelector"></select>
   <button onclick="downloadCSV()">Download CSV</button>
+</div>
 
-  <div style="overflow:auto;">
-    <table id="dataTable">
-      <thead></thead>
-      <tbody></tbody>
-    </table>
-  </div>
+<div class="section">
+  <table id="dataTable">
+    <thead></thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 <script>
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyULuj0wWS1Jd7J6IAZdlgLCj1lEUlggtugTx-CJ0X9Vur58vAsF19k_usPeNF2VsqF/exec";
-const STORAGE_KEY = "property_daily_data";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLPxO_ATDNg8KvUhpr-wgnMzczzRvyZbjABzho36eq03dRcUkVLyEwQb2DZk8TjC4h/exec";
+const STORAGE_KEY = "property_data_storage";
 
-/* Save to local browser */
+/* ---------- SAVE TO LOCAL ---------- */
 function saveToLocal(data) {
   const today = new Date().toISOString().split("T")[0];
   const all = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
@@ -119,7 +146,7 @@ function saveToLocal(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
 }
 
-/* Send to Google Sheet */
+/* ---------- SAVE TO GOOGLE ---------- */
 function saveToGoogle(data) {
   fetch(GOOGLE_SCRIPT_URL, {
     method: "POST",
@@ -129,31 +156,52 @@ function saveToGoogle(data) {
   });
 }
 
-document.getElementById("dataForm").addEventListener("submit", e => {
+/* ---------- FORM SUBMIT ---------- */
+document.getElementById("dataForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
-  const fd = new FormData(e.target);
+  const formData = new FormData(this);
   const obj = {};
-  fd.forEach((v, k) => obj[k] = v);
+  formData.forEach((v, k) => obj[k] = v);
 
   saveToLocal(obj);
   saveToGoogle(obj);
 
-  alert("Saved successfully!");
-  e.target.reset();
-
+  alert("Data saved successfully!");
+  this.reset();
   loadDates();
 });
 
+/* ---------- LOAD FROM GOOGLE SHEET ---------- */
+async function loadFromGoogle() {
+  try {
+    const res = await fetch(GOOGLE_SCRIPT_URL);
+    const data = await res.json();
+
+    if (!data || Object.keys(data).length === 0) {
+      alert("No data found in Google Sheet");
+      return;
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    alert("All data loaded from Google Sheet!");
+    loadDates();
+  } catch (err) {
+    alert("Failed to load data from Google Sheet");
+    console.error(err);
+  }
+}
+
+/* ---------- LOAD DATES ---------- */
 function loadDates() {
   const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
   const select = document.getElementById("dateSelector");
   select.innerHTML = "";
 
-  Object.keys(data).sort().reverse().forEach(d => {
+  Object.keys(data).sort().reverse().forEach(date => {
     const opt = document.createElement("option");
-    opt.value = d;
-    opt.textContent = d;
+    opt.value = date;
+    opt.textContent = date;
     select.appendChild(opt);
   });
 
@@ -164,6 +212,7 @@ document.getElementById("dateSelector").addEventListener("change", e => {
   renderTable(e.target.value);
 });
 
+/* ---------- RENDER TABLE ---------- */
 function renderTable(date) {
   const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
   const rows = data[date] || [];
@@ -177,18 +226,19 @@ function renderTable(date) {
   if (!rows.length) return;
 
   const headers = Object.keys(rows[0]);
-  let tr = document.createElement("tr");
+
+  const tr = document.createElement("tr");
   headers.forEach(h => {
-    let th = document.createElement("th");
+    const th = document.createElement("th");
     th.textContent = h;
     tr.appendChild(th);
   });
   thead.appendChild(tr);
 
   rows.forEach(row => {
-    let tr = document.createElement("tr");
+    const tr = document.createElement("tr");
     headers.forEach(h => {
-      let td = document.createElement("td");
+      const td = document.createElement("td");
       td.textContent = row[h] || "";
       tr.appendChild(td);
     });
@@ -196,9 +246,10 @@ function renderTable(date) {
   });
 }
 
+/* ---------- CSV DOWNLOAD ---------- */
 function downloadCSV() {
   const date = document.getElementById("dateSelector").value;
-  if (!date) return alert("Select a date");
+  if (!date) return alert("Select a date first");
 
   const data = JSON.parse(localStorage.getItem(STORAGE_KEY))[date];
   if (!data || !data.length) return;
@@ -217,6 +268,7 @@ function downloadCSV() {
   link.click();
 }
 
+/* INIT */
 loadDates();
 </script>
 
