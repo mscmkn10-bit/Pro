@@ -1,97 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<title>Property Entry System</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simple Daily Entry</title>
 
 <style>
 body {
-    font-family: Arial, sans-serif;
-    background: #f1f5f9;
-    padding: 20px;
+  font-family: Arial;
+  background: #f3f4f6;
+  padding: 15px;
 }
 form {
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 420px;
-    margin: auto;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  max-width: 1100px;
+  margin: auto;
 }
-h2 {
-    text-align: center;
-    margin-bottom: 10px;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
 }
 input {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+  padding: 8px;
 }
 button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 15px;
-    background: #2563eb;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    cursor: pointer;
+  padding: 10px 15px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
 }
-.status {
-    text-align: center;
-    margin-top: 10px;
-    font-weight: bold;
+button:hover { background:#1e40af; }
+
+.section {
+  max-width: 1100px;
+  margin: 20px auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  font-size: 13px;
+}
+th { background: #e5e7eb; }
+
+select {
+  padding: 8px;
 }
 </style>
 </head>
 
 <body>
 
+<h2 style="text-align:center;">Property Registration Entry</h2>
+
 <form id="dataForm">
-<h2>Daily Entry Form</h2>
+  <div class="grid">
+    <input name="State" placeholder="State" required>
+    <input name="District" placeholder="District">
+    <input name="Document" placeholder="Document">
+    <input name="DocumentNumber" placeholder="Document Number">
+    <input name="DocsPresentation" placeholder="Docs Presentation">
+    <input name="ExecuterName" placeholder="Executer Name">
+    <input name="FavorOfName" placeholder="Favor of Name">
+    <input name="SROName" placeholder="SRO Name">
+    <input name="ClientSource" placeholder="Client Name / Source">
+    <input name="DraftedExecuted" placeholder="Drafted and Executed">
+    <input name="PropertyAddress" placeholder="Property Address">
+    <input name="ConsiderationPrice" placeholder="Consideration Price">
+    <input name="SICSI" placeholder="SI / CSI">
+    <input name="Registration" placeholder="Registration">
+    <input name="StampDuty" placeholder="Stamp Duty">
+    <input name="SocietyDuty" placeholder="Society Duty">
+    <input name="Total" placeholder="Total">
+    <input name="CommissionOf" placeholder="Commission Of">
+    <input name="RemainingAmount" placeholder="Remaining Amount">
+    <input name="SROExpenses" placeholder="SRO Expenses">
+    <input name="FinalAmountSubmission" placeholder="Final Amount Submission">
+    <input name="SFDC" placeholder="SFDC">
+  </div>
 
-<input placeholder="Field 1" id="field1" required>
-<input placeholder="Field 2" id="field2">
-<input placeholder="Field 3" id="field3">
-<input placeholder="Field 4" id="field4">
-<input placeholder="Field 5" id="field5">
-
-<button type="submit">Save Data</button>
-<div class="status" id="status"></div>
+  <br>
+  <button type="submit">Save Entry</button>
 </form>
 
+<div class="section">
+  <h3>Saved Data (Browser)</h3>
+  <select id="dateSelector"></select>
+  <button onclick="downloadCSV()">Download CSV</button>
+
+  <div style="overflow:auto;">
+    <table id="dataTable">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKbWhSS5ib7qMAs1bgUe2eLfonuozq1UUEl9j11ncuphq21pJTs3kz-UuXAfv2pVWVtQ/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyULuj0wWS1Jd7J6IAZdlgLCj1lEUlggtugTx-CJ0X9Vur58vAsF19k_usPeNF2VsqF/exec";
+const STORAGE_KEY = "property_daily_data";
 
-document.getElementById("dataForm").addEventListener("submit", function(e) {
-    e.preventDefault();
+/* Save to local browser */
+function saveToLocal(data) {
+  const today = new Date().toISOString().split("T")[0];
+  const all = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  if (!all[today]) all[today] = [];
+  all[today].push(data);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+}
 
-    const status = document.getElementById("status");
-    status.innerText = "Saving data...";
+/* Send to Google Sheet */
+function saveToGoogle(data) {
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+}
 
-    const formData = new FormData();
-    formData.append("field1", field1.value);
-    formData.append("field2", field2.value);
-    formData.append("field3", field3.value);
-    formData.append("field4", field4.value);
-    formData.append("field5", field5.value);
+document.getElementById("dataForm").addEventListener("submit", e => {
+  e.preventDefault();
 
-    fetch(SCRIPT_URL, {
-        method: "POST",
-        body: formData
-    })
-    .then(() => {
-        status.innerText = "✅ Data saved successfully";
-        document.getElementById("dataForm").reset();
-    })
-    .catch(() => {
-        status.innerText = "❌ Error saving data";
-    });
+  const fd = new FormData(e.target);
+  const obj = {};
+  fd.forEach((v, k) => obj[k] = v);
+
+  saveToLocal(obj);
+  saveToGoogle(obj);
+
+  alert("Saved successfully!");
+  e.target.reset();
+
+  loadDates();
 });
+
+function loadDates() {
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  const select = document.getElementById("dateSelector");
+  select.innerHTML = "";
+
+  Object.keys(data).sort().reverse().forEach(d => {
+    const opt = document.createElement("option");
+    opt.value = d;
+    opt.textContent = d;
+    select.appendChild(opt);
+  });
+
+  if (select.value) renderTable(select.value);
+}
+
+document.getElementById("dateSelector").addEventListener("change", e => {
+  renderTable(e.target.value);
+});
+
+function renderTable(date) {
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  const rows = data[date] || [];
+
+  const thead = document.querySelector("#dataTable thead");
+  const tbody = document.querySelector("#dataTable tbody");
+
+  thead.innerHTML = "";
+  tbody.innerHTML = "";
+
+  if (!rows.length) return;
+
+  const headers = Object.keys(rows[0]);
+  let tr = document.createElement("tr");
+  headers.forEach(h => {
+    let th = document.createElement("th");
+    th.textContent = h;
+    tr.appendChild(th);
+  });
+  thead.appendChild(tr);
+
+  rows.forEach(row => {
+    let tr = document.createElement("tr");
+    headers.forEach(h => {
+      let td = document.createElement("td");
+      td.textContent = row[h] || "";
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function downloadCSV() {
+  const date = document.getElementById("dateSelector").value;
+  if (!date) return alert("Select a date");
+
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEY))[date];
+  if (!data || !data.length) return;
+
+  const headers = Object.keys(data[0]);
+  let csv = headers.join(",") + "\n";
+
+  data.forEach(row => {
+    csv += headers.map(h => `"${row[h] || ""}"`).join(",") + "\n";
+  });
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `data_${date}.csv`;
+  link.click();
+}
+
+loadDates();
 </script>
 
 </body>
