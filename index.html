@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Daily Entry</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f1f5f9;
+    padding: 20px;
+}
+form {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 420px;
+    margin: auto;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+h2 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.status {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<form id="dataForm">
+<h2>Daily Entry Form</h2>
+
+<input placeholder="Field 1" id="field1" required>
+<input placeholder="Field 2" id="field2">
+<input placeholder="Field 3" id="field3">
+<input placeholder="Field 4" id="field4">
+<input placeholder="Field 5" id="field5">
+
+<button type="submit">Save Data</button>
+<div class="status" id="status"></div>
+</form>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKbWhSS5ib7qMAs1bgUe2eLfonuozq1UUEl9j11ncuphq21pJTs3kz-UuXAfv2pVWVtQ/exec";
+
+document.getElementById("dataForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const status = document.getElementById("status");
+    status.innerText = "Saving data...";
+
+    const formData = new FormData();
+    formData.append("field1", field1.value);
+    formData.append("field2", field2.value);
+    formData.append("field3", field3.value);
+    formData.append("field4", field4.value);
+    formData.append("field5", field5.value);
+
+    fetch(SCRIPT_URL, {
+        method: "POST",
+        body: formData
+    })
+    .then(() => {
+        status.innerText = "✅ Data saved successfully";
+        document.getElementById("dataForm").reset();
+    })
+    .catch(() => {
+        status.innerText = "❌ Error saving data";
+    });
+});
+</script>
+
+</body>
+</html>
