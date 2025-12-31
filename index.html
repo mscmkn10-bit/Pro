@@ -1,132 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Property Registration</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; }
-  form { display: grid; gap: 10px; max-width: 600px; margin-bottom: 20px; }
-  input, select, button { padding: 8px; font-size: 14px; width: 100%; }
-  table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-  th { background: #f0f0f0; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Registration Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f7f6; padding: 20px; font-family: sans-serif; }
+        .card { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .table-container { overflow-x: auto; background: white; padding: 15px; border-radius: 8px; }
+        .form-label { font-weight: 600; font-size: 0.9rem; }
+        .sticky-header { position: sticky; top: 0; background: white; z-index: 10; }
+    </style>
 </head>
 <body>
 
-<h2>Property Registration</h2>
+<div class="container-fluid">
+    <h2 class="text-center mb-4">Property Registration System</h2>
 
-<label>Select Date: <input type="date" id="datePicker"></label>
-<button id="loadDateBtn">Load Date</button>
-<button id="downloadCSV">Download CSV</button>
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card p-4">
+                <h5>Registration Form</h5>
+                <form id="regForm" class="row g-2">
+                    <div class="col-md-6"><label class="form-label">State</label><input type="text" name="State" class="form-control" required></div>
+                    <div class="col-md-6"><label class="form-label">District</label><input type="text" name="District" class="form-control" required></div>
+                    <div class="col-md-6"><label class="form-label">Document</label><input type="text" name="Document" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label">Doc Number</label><input type="text" name="DocumentNumber" class="form-control"></div>
+                    <div class="col-md-12"><label class="form-label">Property Address</label><textarea name="PropertyAddress" class="form-control" rows="2"></textarea></div>
+                    <div class="col-md-6"><label class="form-label">SRO Name</label><input type="text" name="SROName" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label">Executer Name</label><input type="text" name="ExecuterName" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label">Favor of Name</label><input type="text" name="FavorOfName" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label">Consideration Price</label><input type="number" name="ConsiderationPrice" class="form-control" oninput="calculateTotal()"></div>
+                    <div class="col-md-6"><label class="form-label">Stamp Duty</label><input type="number" name="StampDuty" class="form-control" oninput="calculateTotal()"></div>
+                    <div class="col-md-6"><label class="form-label">Registration</label><input type="number" name="Registration" class="form-control" oninput="calculateTotal()"></div>
+                    <div class="col-md-6"><label class="form-label">Total</label><input type="number" name="Total" id="total" class="form-control" readonly></div>
+                    <div class="col-md-6"><label class="form-label">Remaining</label><input type="number" name="Remaining" class="form-control"></div>
+                    <div class="col-md-12 mt-3">
+                        <button type="submit" class="btn btn-primary w-100">Submit Registration</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-<form id="propertyForm">
-  <input type="text" name="State" placeholder="State" required>
-  <input type="text" name="District" placeholder="District" required>
-  <input type="text" name="Document" placeholder="Document">
-  <input type="text" name="Document Number" placeholder="Document Number">
-  <input type="text" name="Docs Presentation" placeholder="Docs Presentation">
-  <input type="text" name="Executer Name" placeholder="Executer Name">
-  <input type="text" name="Favor of Name" placeholder="Favor of Name">
-  <input type="text" name="SRO Name" placeholder="SRO Name">
-  <input type="text" name="Client Name / Source" placeholder="Client Name / Source">
-  <input type="text" name="Drafted and Executed" placeholder="Drafted and Executed">
-  <input type="text" name="Property Address" placeholder="Property Address">
-  <input type="number" name="Consideration Price" placeholder="Consideration Price">
-  <input type="text" name="SI / CSI" placeholder="SI / CSI">
-  <input type="number" name="Registration" placeholder="Registration">
-  <input type="number" name="Stamp Duty" placeholder="Stamp Duty">
-  <input type="number" name="Society Duty" placeholder="Society Duty">
-  <input type="number" name="Total" placeholder="Total">
-  <input type="text" name="Commission Of" placeholder="Commission Of">
-  <input type="number" name="Remaining Amount" placeholder="Remaining Amount">
-  <input type="number" name="SRO Expenses" placeholder="SRO Expenses">
-  <input type="number" name="Final Amount Submission" placeholder="Final Amount Submission">
-  <input type="text" name="SFDC" placeholder="SFDC">
-  <button type="submit">Submit</button>
-</form>
-
-<table id="dataTable">
-  <thead></thead>
-  <tbody></tbody>
-</table>
+        <div class="col-lg-8">
+            <div class="card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>Live Data Feed</h5>
+                    <div class="d-flex gap-2">
+                        <input type="date" id="viewDate" class="form-control form-control-sm">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="fetchByDate()">Load Date</button>
+                        <button class="btn btn-sm btn-success" onclick="downloadCSV()">Download CSV</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="table table-bordered table-hover" id="dataTable">
+                        <thead class="table-light sticky-header">
+                            <tr id="tableHeaders">
+                                </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwxz6tgSPwM6mGW3YzXhM52TiZfWMDceZ-FiO8KgzCltDCZ057EbA9jeH3HWHhwMdTi/exec"; // replace with your Apps Script URL
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwdgnv6fZWoZ01BSI5kCHoejBMju_EmCr8Wbh7fRnWgIpC4VLnTUfK40soARgNB_f93/exec';
+    const form = document.getElementById('regForm');
+    
+    // 1. Initial Load from LocalStorage
+    window.onload = () => {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('viewDate').value = today;
+        renderTable(getLocalData());
+    };
 
-let allData = [];
+    // 2. Calculation Logic
+    function calculateTotal() {
+        const price = parseFloat(form.ConsiderationPrice.value) || 0;
+        const stamp = parseFloat(form.StampDuty.value) || 0;
+        const reg = parseFloat(form.Registration.value) || 0;
+        document.getElementById('total').value = price + stamp + reg;
+    }
 
-// Load data from localStorage for today
-const today = new Date().toISOString().split('T')[0];
-const stored = localStorage.getItem(today);
-if (stored) {
-  allData = JSON.parse(stored);
-  renderTable(allData);
-}
+    // 3. Handle Form Submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        data.SubmissionDate = new Date().toLocaleDateString();
 
-document.getElementById("propertyForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
-  const obj = {};
-  formData.forEach((v,k) => obj[k]=v);
-  
-  // Save to localStorage
-  allData.push(obj);
-  localStorage.setItem(today, JSON.stringify(allData));
-  
-  // Render table instantly
-  renderTable(allData);
-  
-  // Send to Google Sheets
-  await fetch(WEB_APP_URL, {
-    method: "POST",
-    body: JSON.stringify(obj)
-  }).catch(err => console.error(err));
-  
-  e.target.reset();
-});
+        // Instant Update UI & LocalStorage
+        const currentData = getLocalData();
+        currentData.unshift(data); // Add to top
+        localStorage.setItem('propertyData', JSON.stringify(currentData));
+        renderTable(currentData);
 
-document.getElementById("loadDateBtn").addEventListener("click", async () => {
-  const date = document.getElementById("datePicker").value;
-  if (!date) return alert("Select a date");
-  const res = await fetch(`${WEB_APP_URL}?date=${date}`);
-  const data = await res.json();
-  allData = data;
-  renderTable(allData);
-});
+        // Reset Form
+        form.reset();
 
-document.getElementById("downloadCSV").addEventListener("click", () => {
-  if (!allData.length) return alert("No data to download");
-  const keys = Object.keys(allData[0]);
-  const csv = [
-    keys.join(","),
-    ...allData.map(row => keys.map(k => `"${row[k]||''}"`).join(","))
-  ].join("\n");
-  
-  const blob = new Blob([csv], {type: "text/csv"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "property_data.csv";
-  a.click();
-  URL.revokeObjectURL(url);
-});
+        // Send to Google Sheets (Background)
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(data)
+            });
+            alert("Syncing with Google Sheets...");
+        } catch (err) {
+            console.error("Cloud sync failed, saved locally.", err);
+        }
+    });
 
-function renderTable(data) {
-  const table = document.getElementById("dataTable");
-  const thead = table.querySelector("thead");
-  const tbody = table.querySelector("tbody");
-  thead.innerHTML = "";
-  tbody.innerHTML = "";
-  if (!data.length) return;
-  
-  const headers = Object.keys(data[0]);
-  thead.innerHTML = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
-  tbody.innerHTML = data.map(row => 
-    "<tr>" + headers.map(h => `<td>${row[h]||''}</td>`).join("") + "</tr>"
-  ).join("");
-}
+    // 4. Data Functions
+    function getLocalData() {
+        return JSON.parse(localStorage.getItem('propertyData') || '[]');
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById('tableBody');
+        const thead = document.getElementById('tableHeaders');
+        tbody.innerHTML = '';
+        
+        if (data.length === 0) return;
+
+        // Create Headers
+        const headers = Object.keys(data[0]);
+        thead.innerHTML = headers.map(h => `<th>${h}</th>`).join('');
+
+        // Create Rows
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = headers.map(h => `<td>${row[h] || ''}</td>`).join('');
+            tbody.appendChild(tr);
+        });
+    }
+
+    // 5. Fetch from Cloud by Date
+    async function fetchByDate() {
+        const dateStr = document.getElementById('viewDate').value; 
+        // Note: Formatting date might be needed based on your Sheet locale
+        const formattedDate = new Date(dateStr).toLocaleDateString();
+        
+        const resp = await fetch(`${SCRIPT_URL}?date=${formattedDate}`);
+        const cloudData = await resp.json();
+        
+        if(cloudData.length > 0) {
+            renderTable(cloudData);
+        } else {
+            alert("No data found for this date in Google Sheets.");
+        }
+    }
+
+    // 6. CSV Export
+    function downloadCSV() {
+        const data = getLocalData();
+        if (data.length === 0) return;
+        const headers = Object.keys(data[0]).join(',');
+        const rows = data.map(row => Object.values(row).join(',')).join('\n');
+        const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + rows;
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `property_data_${new Date().toLocaleDateString()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+    }
 </script>
 
 </body>
