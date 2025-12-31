@@ -17,7 +17,7 @@ h2 {
 }
 
 form {
-  background: #ffffff;
+  background: white;
   padding: 15px;
   border-radius: 8px;
   max-width: 1200px;
@@ -80,7 +80,7 @@ th {
   overflow-x: auto;
 }
 
-select {
+select, input[type="date"] {
   padding: 8px;
 }
 </style>
@@ -122,7 +122,13 @@ select {
 
 <div class="actions">
   <button onclick="loadFromGoogle()">Load Data From Google Sheet</button>
+
+  <input type="date" id="datePicker">
+
+  <button onclick="loadSelectedDate()">Load Selected Date</button>
+
   <select id="dateSelector"></select>
+
   <button onclick="downloadCSV()">Download CSV</button>
 </div>
 
@@ -134,19 +140,19 @@ select {
 </div>
 
 <script>
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLPxO_ATDNg8KvUhpr-wgnMzczzRvyZbjABzho36eq03dRcUkVLyEwQb2DZk8TjC4h/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFmGAJjePNsKnfE1WgTkvu9SJ1xHhp1cr2Z_UzfHkXHMTCuUuw8yOWSy5YzL7cg6Mu/exec";
 const STORAGE_KEY = "property_data_storage";
 
-/* ---------- SAVE TO LOCAL ---------- */
+/* Save locally */
 function saveToLocal(data) {
   const today = new Date().toISOString().split("T")[0];
-  const all = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  if (!all[today]) all[today] = [];
-  all[today].push(data);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  const store = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  if (!store[today]) store[today] = [];
+  store[today].push(data);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
 }
 
-/* ---------- SAVE TO GOOGLE ---------- */
+/* Save to Google Sheet */
 function saveToGoogle(data) {
   fetch(GOOGLE_SCRIPT_URL, {
     method: "POST",
@@ -156,7 +162,7 @@ function saveToGoogle(data) {
   });
 }
 
-/* ---------- FORM SUBMIT ---------- */
+/* Submit handler */
 document.getElementById("dataForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
@@ -169,10 +175,11 @@ document.getElementById("dataForm").addEventListener("submit", function (e) {
 
   alert("Data saved successfully!");
   this.reset();
+
   loadDates();
 });
 
-/* ---------- LOAD FROM GOOGLE SHEET ---------- */
+/* Load from Google Sheet */
 async function loadFromGoogle() {
   try {
     const res = await fetch(GOOGLE_SCRIPT_URL);
@@ -184,15 +191,15 @@ async function loadFromGoogle() {
     }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    alert("All data loaded from Google Sheet!");
+    alert("Data loaded successfully from Google Sheet!");
     loadDates();
   } catch (err) {
-    alert("Failed to load data from Google Sheet");
+    alert("Error loading data from Google Sheet");
     console.error(err);
   }
 }
 
-/* ---------- LOAD DATES ---------- */
+/* Populate date dropdown */
 function loadDates() {
   const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
   const select = document.getElementById("dateSelector");
@@ -208,11 +215,25 @@ function loadDates() {
   if (select.value) renderTable(select.value);
 }
 
-document.getElementById("dateSelector").addEventListener("change", e => {
-  renderTable(e.target.value);
-});
+/* Load by calendar date */
+function loadSelectedDate() {
+  const selected = document.getElementById("datePicker").value;
+  if (!selected) {
+    alert("Please select a date");
+    return;
+  }
 
-/* ---------- RENDER TABLE ---------- */
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  if (!data[selected]) {
+    alert("No data found for selected date");
+    return;
+  }
+
+  document.getElementById("dateSelector").value = selected;
+  renderTable(selected);
+}
+
+/* Render table */
 function renderTable(date) {
   const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
   const rows = data[date] || [];
@@ -246,10 +267,10 @@ function renderTable(date) {
   });
 }
 
-/* ---------- CSV DOWNLOAD ---------- */
+/* Download CSV */
 function downloadCSV() {
   const date = document.getElementById("dateSelector").value;
-  if (!date) return alert("Select a date first");
+  if (!date) return alert("Select a date");
 
   const data = JSON.parse(localStorage.getItem(STORAGE_KEY))[date];
   if (!data || !data.length) return;
@@ -268,7 +289,10 @@ function downloadCSV() {
   link.click();
 }
 
-/* INIT */
+/* Auto set today's date */
+document.getElementById("datePicker").value =
+  new Date().toISOString().split("T")[0];
+
 loadDates();
 </script>
 
