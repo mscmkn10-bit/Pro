@@ -2,298 +2,131 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Property Registration System</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Property Registration</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f9;
-  padding: 15px;
-}
-
-h2 {
-  text-align: center;
-}
-
-form {
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
-  max-width: 1200px;
-  margin: auto;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
-}
-
-input {
-  padding: 8px;
-  width: 100%;
-}
-
-button {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  background: #2563eb;
-  color: white;
-  font-weight: bold;
-}
-
-button:hover {
-  background: #1e40af;
-}
-
-.actions {
-  margin: 15px auto;
-  max-width: 1200px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  font-size: 13px;
-}
-
-th, td {
-  border: 1px solid #ccc;
-  padding: 6px;
-  text-align: left;
-}
-
-th {
-  background: #e5e7eb;
-}
-
-.section {
-  max-width: 1200px;
-  margin: 20px auto;
-  overflow-x: auto;
-}
-
-select, input[type="date"] {
-  padding: 8px;
-}
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  form { display: grid; gap: 10px; max-width: 600px; margin-bottom: 20px; }
+  input, select, button { padding: 8px; font-size: 14px; width: 100%; }
+  table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  th { background: #f0f0f0; }
 </style>
 </head>
-
 <body>
 
-<h2>Property Registration Entry System</h2>
+<h2>Property Registration</h2>
 
-<form id="dataForm">
-  <div class="grid">
-    <input name="State" placeholder="State" required>
-    <input name="District" placeholder="District">
-    <input name="Document" placeholder="Document">
-    <input name="DocumentNumber" placeholder="Document Number">
-    <input name="DocsPresentation" placeholder="Docs Presentation">
-    <input name="ExecuterName" placeholder="Executer Name">
-    <input name="FavorOfName" placeholder="Favor of Name">
-    <input name="SROName" placeholder="SRO Name">
-    <input name="ClientSource" placeholder="Client Name / Source">
-    <input name="DraftedExecuted" placeholder="Drafted and Executed">
-    <input name="PropertyAddress" placeholder="Property Address">
-    <input name="ConsiderationPrice" placeholder="Consideration Price">
-    <input name="SICSI" placeholder="SI / CSI">
-    <input name="Registration" placeholder="Registration">
-    <input name="StampDuty" placeholder="Stamp Duty">
-    <input name="SocietyDuty" placeholder="Society Duty">
-    <input name="Total" placeholder="Total">
-    <input name="CommissionOf" placeholder="Commission Of">
-    <input name="RemainingAmount" placeholder="Remaining Amount">
-    <input name="SROExpenses" placeholder="SRO Expenses">
-    <input name="FinalAmountSubmission" placeholder="Final Amount Submission">
-    <input name="SFDC" placeholder="SFDC">
-  </div>
+<label>Select Date: <input type="date" id="datePicker"></label>
+<button id="loadDateBtn">Load Date</button>
+<button id="downloadCSV">Download CSV</button>
 
-  <br>
-  <button type="submit">Save Entry</button>
+<form id="propertyForm">
+  <input type="text" name="State" placeholder="State" required>
+  <input type="text" name="District" placeholder="District" required>
+  <input type="text" name="Document" placeholder="Document">
+  <input type="text" name="Document Number" placeholder="Document Number">
+  <input type="text" name="Docs Presentation" placeholder="Docs Presentation">
+  <input type="text" name="Executer Name" placeholder="Executer Name">
+  <input type="text" name="Favor of Name" placeholder="Favor of Name">
+  <input type="text" name="SRO Name" placeholder="SRO Name">
+  <input type="text" name="Client Name / Source" placeholder="Client Name / Source">
+  <input type="text" name="Drafted and Executed" placeholder="Drafted and Executed">
+  <input type="text" name="Property Address" placeholder="Property Address">
+  <input type="number" name="Consideration Price" placeholder="Consideration Price">
+  <input type="text" name="SI / CSI" placeholder="SI / CSI">
+  <input type="number" name="Registration" placeholder="Registration">
+  <input type="number" name="Stamp Duty" placeholder="Stamp Duty">
+  <input type="number" name="Society Duty" placeholder="Society Duty">
+  <input type="number" name="Total" placeholder="Total">
+  <input type="text" name="Commission Of" placeholder="Commission Of">
+  <input type="number" name="Remaining Amount" placeholder="Remaining Amount">
+  <input type="number" name="SRO Expenses" placeholder="SRO Expenses">
+  <input type="number" name="Final Amount Submission" placeholder="Final Amount Submission">
+  <input type="text" name="SFDC" placeholder="SFDC">
+  <button type="submit">Submit</button>
 </form>
 
-<div class="actions">
-  <button onclick="loadFromGoogle()">Load Data From Google Sheet</button>
-
-  <input type="date" id="datePicker">
-
-  <button onclick="loadSelectedDate()">Load Selected Date</button>
-
-  <select id="dateSelector"></select>
-
-  <button onclick="downloadCSV()">Download CSV</button>
-</div>
-
-<div class="section">
-  <table id="dataTable">
-    <thead></thead>
-    <tbody></tbody>
-  </table>
-</div>
+<table id="dataTable">
+  <thead></thead>
+  <tbody></tbody>
+</table>
 
 <script>
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFmGAJjePNsKnfE1WgTkvu9SJ1xHhp1cr2Z_UzfHkXHMTCuUuw8yOWSy5YzL7cg6Mu/exec";
-const STORAGE_KEY = "property_data_storage";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxEY-bnWgNzh9AiHsLeXTABwffsFxf3W7M-czhNLLO5AJOGRq75cvaHKqtlBD2iGeIK/exec"; // replace with your Apps Script URL
 
-/* Save locally */
-function saveToLocal(data) {
-  const today = new Date().toISOString().split("T")[0];
-  const store = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  if (!store[today]) store[today] = [];
-  store[today].push(data);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+let allData = [];
+
+// Load data from localStorage for today
+const today = new Date().toISOString().split('T')[0];
+const stored = localStorage.getItem(today);
+if (stored) {
+  allData = JSON.parse(stored);
+  renderTable(allData);
 }
 
-/* Save to Google Sheet */
-function saveToGoogle(data) {
-  fetch(GOOGLE_SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
-}
-
-/* Submit handler */
-document.getElementById("dataForm").addEventListener("submit", function (e) {
+document.getElementById("propertyForm").addEventListener("submit", async e => {
   e.preventDefault();
-
-  const formData = new FormData(this);
+  const formData = new FormData(e.target);
   const obj = {};
-  formData.forEach((v, k) => obj[k] = v);
-
-  saveToLocal(obj);
-  saveToGoogle(obj);
-
-  alert("Data saved successfully!");
-  this.reset();
-
-  loadDates();
+  formData.forEach((v,k) => obj[k]=v);
+  
+  // Save to localStorage
+  allData.push(obj);
+  localStorage.setItem(today, JSON.stringify(allData));
+  
+  // Render table instantly
+  renderTable(allData);
+  
+  // Send to Google Sheets
+  await fetch(WEB_APP_URL, {
+    method: "POST",
+    body: JSON.stringify(obj)
+  }).catch(err => console.error(err));
+  
+  e.target.reset();
 });
 
-/* Load from Google Sheet */
-async function loadFromGoogle() {
-  try {
-    const res = await fetch(GOOGLE_SCRIPT_URL);
-    const data = await res.json();
+document.getElementById("loadDateBtn").addEventListener("click", async () => {
+  const date = document.getElementById("datePicker").value;
+  if (!date) return alert("Select a date");
+  const res = await fetch(`${WEB_APP_URL}?date=${date}`);
+  const data = await res.json();
+  allData = data;
+  renderTable(allData);
+});
 
-    if (!data || Object.keys(data).length === 0) {
-      alert("No data found in Google Sheet");
-      return;
-    }
+document.getElementById("downloadCSV").addEventListener("click", () => {
+  if (!allData.length) return alert("No data to download");
+  const keys = Object.keys(allData[0]);
+  const csv = [
+    keys.join(","),
+    ...allData.map(row => keys.map(k => `"${row[k]||''}"`).join(","))
+  ].join("\n");
+  
+  const blob = new Blob([csv], {type: "text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "property_data.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+});
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    alert("Data loaded successfully from Google Sheet!");
-    loadDates();
-  } catch (err) {
-    alert("Error loading data from Google Sheet");
-    console.error(err);
-  }
-}
-
-/* Populate date dropdown */
-function loadDates() {
-  const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  const select = document.getElementById("dateSelector");
-  select.innerHTML = "";
-
-  Object.keys(data).sort().reverse().forEach(date => {
-    const opt = document.createElement("option");
-    opt.value = date;
-    opt.textContent = date;
-    select.appendChild(opt);
-  });
-
-  if (select.value) renderTable(select.value);
-}
-
-/* Load by calendar date */
-function loadSelectedDate() {
-  const selected = document.getElementById("datePicker").value;
-  if (!selected) {
-    alert("Please select a date");
-    return;
-  }
-
-  const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  if (!data[selected]) {
-    alert("No data found for selected date");
-    return;
-  }
-
-  document.getElementById("dateSelector").value = selected;
-  renderTable(selected);
-}
-
-/* Render table */
-function renderTable(date) {
-  const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  const rows = data[date] || [];
-
-  const thead = document.querySelector("#dataTable thead");
-  const tbody = document.querySelector("#dataTable tbody");
-
+function renderTable(data) {
+  const table = document.getElementById("dataTable");
+  const thead = table.querySelector("thead");
+  const tbody = table.querySelector("tbody");
   thead.innerHTML = "";
   tbody.innerHTML = "";
-
-  if (!rows.length) return;
-
-  const headers = Object.keys(rows[0]);
-
-  const tr = document.createElement("tr");
-  headers.forEach(h => {
-    const th = document.createElement("th");
-    th.textContent = h;
-    tr.appendChild(th);
-  });
-  thead.appendChild(tr);
-
-  rows.forEach(row => {
-    const tr = document.createElement("tr");
-    headers.forEach(h => {
-      const td = document.createElement("td");
-      td.textContent = row[h] || "";
-      tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-  });
-}
-
-/* Download CSV */
-function downloadCSV() {
-  const date = document.getElementById("dateSelector").value;
-  if (!date) return alert("Select a date");
-
-  const data = JSON.parse(localStorage.getItem(STORAGE_KEY))[date];
-  if (!data || !data.length) return;
-
+  if (!data.length) return;
+  
   const headers = Object.keys(data[0]);
-  let csv = headers.join(",") + "\n";
-
-  data.forEach(row => {
-    csv += headers.map(h => `"${row[h] || ""}"`).join(",") + "\n";
-  });
-
-  const blob = new Blob([csv], { type: "text/csv" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `data_${date}.csv`;
-  link.click();
+  thead.innerHTML = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
+  tbody.innerHTML = data.map(row => 
+    "<tr>" + headers.map(h => `<td>${row[h]||''}</td>`).join("") + "</tr>"
+  ).join("");
 }
-
-/* Auto set today's date */
-document.getElementById("datePicker").value =
-  new Date().toISOString().split("T")[0];
-
-loadDates();
 </script>
 
 </body>
