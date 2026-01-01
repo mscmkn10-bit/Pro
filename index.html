@@ -49,7 +49,7 @@
                                     <div class="col-6"><label class="small-label">Sales Fees</label><input type="number" id="sFees" name="Sales Person Fees" class="form-control" required></div>
                                     <div class="col-6"><label class="small-label">Office Fees (Auto)</label><input type="number" id="oFees" name="Office Fees" class="form-control bg-light" readonly></div>
                                     <div class="col-6"><label class="small-label">SRO Exp.</label><input type="number" id="sro" name="SRO Expenses" class="form-control"></div>
-                                    <div class="col-12"><label class="small-label text-success">Submission (Office - SRO)</label><input type="number" id="aSub" name="Amount Submission" class="form-control final-amt" readonly></div>
+                                    <div class="col-12"><label class="small-label text-success">Amount Submission</label><input type="number" id="aSub" name="Amount Submission" class="form-control final-amt" readonly></div>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100 mt-3 fw-bold shadow">SAVE TO SHEET</button>
@@ -95,7 +95,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxalqv2NhIlfbf4AuWuaJhaeVuIYtDht-SXnuTmgDEdkKfW8332Xk0DzjBNx2Gm9xBv/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4-xcSffQmSLlqEv9kyGm3Zr5jsJDe06EMooGwQcb57jZ82h55mKd-Su0KfRt3E0G6/exec";
 
     // Auto Calculation
     ['tFees', 'sFees', 'sro'].forEach(id => {
@@ -191,7 +191,7 @@
         const e = document.getElementById('eDate').value;
         if(s && e) d = d.filter(i => i.Date >= s && i.Date <= e);
 
-        doc.text("Detailed Registry Report (Excl. Phone/Challan)", 14, 10);
+        doc.text("Detailed Registry Report", 14, 10);
         
         // Removed Phone No and Per Challan (17 Fields total)
         const head = [['Date', 'State', 'District', 'Party', 'Doc Type', 'Bank', 'Executer', 'Reg.Amt', 'Society', 'E-Stamp', 'Reg.Fees', 'SI/CSI', 'Total', 'Sales', 'Office', 'SRO', 'Sub.']];
@@ -217,3 +217,4 @@
 </script>
 </body>
 </html>
+
