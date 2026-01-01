@@ -12,29 +12,15 @@
         .card-header { background: #0d6efd; color: white; font-weight: bold; }
         .calc-box { background: #fff9db; border: 1px solid #f9e79f; border-radius: 10px; padding: 15px; }
         .final-amt { background: #d4edda !important; font-weight: bold; border: 2px solid #28a745 !important; }
-        
-        /* Auto Capitalize for all inputs */
         input[type="text"] { text-transform: uppercase; }
-
-        /* WEBSITE PAGE WATERMARK */
         .watermark-container { position: relative; overflow: hidden; }
         .watermark-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 3rem;
-            color: rgba(0, 0, 0, 0.05);
-            font-weight: bold;
-            white-space: nowrap;
-            pointer-events: none;
-            z-index: 0;
-            width: 100%;
-            text-align: center;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 3rem; color: rgba(0, 0, 0, 0.05); font-weight: bold; pointer-events: none; z-index: 0;
+            width: 100%; text-align: center;
         }
-
         .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 2000; align-items: center; justify-content: center; }
-        .table-responsive { position: relative; z-index: 1; max-height: 550px; overflow-y: auto; background: transparent; }
+        .table-responsive { position: relative; z-index: 1; max-height: 550px; overflow-y: auto; }
         .small-label { font-size: 0.75rem; font-weight: 700; color: #444; }
     </style>
 </head>
@@ -82,10 +68,10 @@
 
         <div class="col-lg-8">
             <div class="card h-100 shadow-sm watermark-container">
-                <div class="watermark-text">GOVIND SINGH MAKRANA</div>
+                <div class="watermark-text">GOVIND SINGH CHOUHAN MAKRANA</div>
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>REGISTRY LIST</span>
-                    <button class="btn btn-sm btn-light text-primary fw-bold" onclick="syncData()">FETCH DATA</button>
+                    <button class="btn btn-sm btn-light text-primary fw-bold" onclick="syncData()"><i class="fas fa-sync"></i> SYNC</button>
                 </div>
                 <div class="card-body">
                     <div class="row g-2 mb-3">
@@ -99,7 +85,7 @@
                         <table class="table table-bordered table-sm table-hover text-center">
                             <thead class="table-primary position-sticky top-0">
                                 <tr>
-                                    <th>DATE</th><th>PARTY</th><th>DOC TYPE</th><th>TOTAL</th><th>OFFICE</th><th>SRO</th><th>SUB.</th><th>DELETE</th>
+                                    <th>DATE</th><th>PARTY</th><th>DOC TYPE</th><th>TOTAL</th><th>OFFICE</th><th>SRO</th><th>SUB.</th><th>DEL</th>
                                 </tr>
                             </thead>
                             <tbody id="tBody"></tbody>
@@ -111,15 +97,14 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzBd2DVo9HLDsEBBD39hOckS7ThjiVJlg-N17qhimY3I_GoS7yaQ_qZFPIvPKtS1jO2/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwnAtp8O7J945C43IOUG66ywAAU6Vppnspf_BvJYVh33HG-dCpdzReGRTmptRTLF5JA/exec";
 
-    // Auto Calc
+    // Auto Calc Logic
     ['tFees', 'sFees', 'sro'].forEach(id => {
         document.getElementById(id).addEventListener('input', () => {
             const t = parseFloat(document.getElementById('tFees').value) || 0;
@@ -131,23 +116,21 @@
         });
     });
 
+    // Form Submission
     document.getElementById('regForm').addEventListener('submit', function(e) {
         e.preventDefault();
         document.getElementById('loader').style.display='flex';
         const fd = new FormData(this);
-        const obj = {};
-        fd.forEach((v, k) => {
-            // Force Capital letters before sending to Excel
-            obj[k] = (typeof v === 'string') ? v.toUpperCase() : v;
-        });
-        obj['Date'] = new Date().toISOString().split('T')[0];
+        const params = new URLSearchParams();
+        fd.forEach((v, k) => params.append(k, v.toString().toUpperCase()));
         
-        fetch(SCRIPT_URL, { method: 'POST', body: new URLSearchParams(obj) })
+        fetch(SCRIPT_URL, { method: 'POST', body: params, mode: 'no-cors' })
         .then(() => { 
-            alert("Entry Saved Successfully!"); 
+            alert("Entry Sent to Sheet!"); 
             this.reset(); 
-            syncData(); 
+            setTimeout(syncData, 2000); 
         })
+        .catch(err => alert("Error: " + err))
         .finally(() => document.getElementById('loader').style.display='none');
     });
 
@@ -157,30 +140,31 @@
         .then(res => res.json())
         .then(json => {
             localStorage.setItem('regData', JSON.stringify(json.data));
-            applyFilter();
+            render(json.data);
         })
         .finally(() => document.getElementById('loader').style.display='none');
     }
 
     function deleteEntry(rowId) {
-        if(confirm("Confirm Deletion from Google Sheet?")) {
+        if(confirm("Permanent Delete from Excel?")) {
             document.getElementById('loader').style.display='flex';
-            fetch(`${SCRIPT_URL}?action=delete&rowId=${rowId}`)
-            .then(() => { alert("Record Deleted!"); syncData(); })
+            fetch(`${SCRIPT_URL}?action=delete&rowId=${rowId}`, {mode: 'no-cors'})
+            .then(() => { alert("Deleted!"); syncData(); });
         }
     }
 
     function render(data) {
         const body = document.getElementById('tBody');
         body.innerHTML = '';
-        data.forEach(r => {
+        if(!data || data.length === 0) return;
+        data.reverse().forEach(r => {
             body.innerHTML += `<tr>
-                <td>${r.Date.split('T')[0]}</td>
+                <td>${String(r.Date).split('T')[0]}</td>
                 <td class="fw-bold">${String(r['Party Name']).toUpperCase()}</td>
                 <td>${String(r['Document Type']).toUpperCase()}</td>
                 <td>${r['Total Fees']}</td><td>${r['Office Fees']}</td><td>${r['SRO Expenses']}</td>
                 <td class="text-success fw-bold">${r['Amount Submission']}</td>
-                <td><button class="btn btn-sm btn-outline-danger" onclick="deleteEntry(${r.rowId})"><i class="fas fa-trash-alt"></i></button></td>
+                <td><button class="btn btn-sm btn-outline-danger" onclick="deleteEntry(${r.rowId})"><i class="fas fa-trash"></i></button></td>
             </tr>`;
         });
     }
@@ -205,37 +189,20 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'mm', 'a4');
         let d = JSON.parse(localStorage.getItem('regData')) || [];
-        
         const head = [['DATE', 'STATE', 'DISTRICT', 'PARTY', 'DOC TYPE', 'BANK', 'EXECUTER', 'REG.AMT', 'SOCIETY', 'E-STAMP', 'REG.FEES', 'SI/CSI', 'TOTAL', 'SALES', 'OFFICE', 'SRO', 'SUB.']];
-        const body = d.map(r => [
-            r.Date.split('T')[0], r.State.toUpperCase(), r.District.toUpperCase(), 
-            r['Party Name'].toUpperCase(), r['Document Type'].toUpperCase(), 
-            r['Bank Name'].toUpperCase(), r['Executer Name'].toUpperCase(), 
-            r['Registry Amount'], r['Society Duty'], r['E-Stamp'], r['Registration Fees'], 
-            r['SI/CSI'], r['Total Fees'], r['Sales Person Fees'], 
-            r['Office Fees'], r['SRO Expenses'], r['Amount Submission']
-        ]);
+        const body = d.map(r => [r.Date, r.State, r.District, r['Party Name'], r['Document Type'], r['Bank Name'], r['Executer Name'], r['Registry Amount'], r['Society Duty'], r['E-Stamp'], r['Registration Fees'], r['SI/CSI'], r['Total Fees'], r['Sales Person Fees'], r['Office Fees'], r['SRO Expenses'], r['Amount Submission']]);
 
         doc.autoTable({
-            head: head, body: body, startY: 20, theme: 'grid',
-            styles: { fontSize: 5, cellPadding: 1 },
-            headStyles: { fillColor: [13, 110, 253] },
+            head: head, body: body, startY: 20, theme: 'grid', styles: { fontSize: 5 },
             didDrawPage: function (data) {
-                // HIGHLIGHTED PDF WATERMARK
-                doc.setTextColor(200, 200, 200); 
-                doc.setFontSize(40);
-                doc.setFont("helvetica", "bold");
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const pageHeight = doc.internal.pageSize.getHeight();
-                doc.text("GOVIND SINGH CHOUHAN MAKRANA", pageWidth / 2, pageHeight / 2, {
-                    align: 'center', angle: 45
-                });
+                doc.setTextColor(200, 200, 200); doc.setFontSize(35); doc.setFont("helvetica", "bold");
+                doc.text("GOVIND SINGH CHOUHAN MAKRANA", doc.internal.pageSize.getWidth()/2, doc.internal.pageSize.getHeight()/2, {align:'center', angle:45});
             }
         });
-        doc.save("REPORT_FINAL_ALL_CAPS.pdf");
+        doc.save("REPORT.pdf");
     }
 
-    window.onload = () => syncData();
+    window.onload = syncData;
 </script>
 </body>
 </html>
