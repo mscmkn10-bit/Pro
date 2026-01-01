@@ -9,32 +9,15 @@
     
     <style>
         body { background-color: #f4f7f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        
-        /* Login Screen - Force Display */
-        #authOverlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #0d6efd; z-index: 9999; display: flex; 
-            align-items: center; justify-content: center; 
-        }
-        .auth-card { 
-            background: white; padding: 40px; border-radius: 20px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; 
-            width: 100%; max-width: 400px; 
-        }
-        
-        /* Main UI - Hidden by default */
+        #authOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0d6efd; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .auth-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; width: 100%; max-width: 400px; }
         #mainUI { display: none; padding: 20px; }
-        
         .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .card-header { background: #0d6efd; color: white; font-weight: bold; border-radius: 12px 12px 0 0 !important; }
         .calc-box { background: #fffceb; border: 1px solid #f9e79f; border-radius: 8px; padding: 15px; margin-top: 15px; }
         .final-amt { background: #d1e7dd !important; font-weight: bold; border: 2px solid #198754 !important; color: #198754; }
-        
         input[type="text"] { text-transform: uppercase; }
-        .loading-overlay { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(255,255,255,0.8); z-index: 2000; align-items: center; justify-content: center; 
-        }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 2000; align-items: center; justify-content: center; }
         .small-label { font-size: 11px; font-weight: 700; color: #555; text-transform: uppercase; margin-bottom: 2px; display: block; }
     </style>
 </head>
@@ -74,7 +57,7 @@
                             <div class="col-6"><span class="small-label">Phone No.</span><input type="text" name="Phone No." class="form-control"></div>
                             <div class="col-6"><span class="small-label">Registry Amount</span><input type="number" name="Registry Amount" class="form-control"></div>
                             <div class="col-6"><span class="small-label">Society Duty</span><input type="number" name="Society Duty" class="form-control"></div>
-                            <div class="col-6"><span class="small-label">E-Stamp</span><input type="number" name="E-Stamp" class="form-control"></div>
+                            <div class="col-6"><span class="small-label">Stamp Duty/SC</span><input type="number" name="Stamp Duty/SC" class="form-control"></div>
                             <div class="col-6"><span class="small-label">Registration Fees</span><input type="number" name="Registration Fees" class="form-control"></div>
                             <div class="col-6"><span class="small-label">SI/CSI</span><input type="number" name="SI/CSI" class="form-control"></div>
                             <div class="col-12"><span class="small-label">Per Challan</span><input type="text" name="Per Challan" class="form-control"></div>
@@ -132,11 +115,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    // --- CONFIGURE YOUR URL HERE ---
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2Q9ed8dyPNfEO0oMFtkh1KRnJKc_LoPVd6j5E_7Ialvtv8wWS0BwbC3QWLEQUcuW3/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwKlDVsLOsIqeLBb6mZFT8x33qLNxIaoHII9IMFq4RYA8OqkYjz1gNVtWs6JRKS-N4/exec";
     const MASTER_PASS = "admin123";
 
-    // Password Check
     function checkPass() {
         const input = document.getElementById('passInput').value;
         if(input === MASTER_PASS) {
@@ -148,7 +129,6 @@
         }
     }
 
-    // Calculations
     ['tFees', 'sFees', 'sro'].forEach(id => {
         document.getElementById(id).addEventListener('input', () => {
             const t = parseFloat(document.getElementById('tFees').value) || 0;
@@ -159,7 +139,6 @@
         });
     });
 
-    // Form Submit
     document.getElementById('regForm').addEventListener('submit', function(e) {
         e.preventDefault();
         document.getElementById('loader').style.display='flex';
@@ -177,7 +156,6 @@
         .finally(() => document.getElementById('loader').style.display='none');
     });
 
-    // Fetch Data
     function syncData() {
         document.getElementById('loader').style.display='flex';
         fetch(SCRIPT_URL + "?action=read")
@@ -189,7 +167,6 @@
         .finally(() => document.getElementById('loader').style.display='none');
     }
 
-    // Delete
     function deleteEntry(rowId) {
         if(confirm("Are you sure? This will delete the record from Google Sheets.")) {
             document.getElementById('loader').style.display='flex';
@@ -198,7 +175,6 @@
         }
     }
 
-    // Render Table
     function render(data) {
         const body = document.getElementById('tBody');
         body.innerHTML = '';
@@ -234,12 +210,46 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'mm', 'a4');
         const d = JSON.parse(localStorage.getItem('regData')) || [];
-        const head = [['DATE', 'PARTY NAME', 'TYPE', 'TOTAL FEES', 'OFFICE FEES', 'SRO EXPENSES', 'FINAL AMT']];
-        const body = d.map(r => [r.Date, r['Party Name'], r['Document Type'], r['Total Fees'], r['Office Fees'], r['SRO Expenses'], r['Amount Submission']]);
-        doc.autoTable({ head, body, startY: 10, theme: 'grid' });
+        
+        // PDF Columns Selection (Removed: Phone, E-Stamp, Reg Fees, SI/CSI, Per Challan)
+        const head = [['DATE', 'STATE', 'DISTRICT', 'PARTY NAME', 'DOC TYPE', 'BANK', 'EXECUTER', 'REG. AMT', 'SOCIETY', 'TOTAL FEES', 'SALES COMM.', 'OFFICE FEES', 'SRO EXP.', 'SUBMIT AMT']];
+        
+        const body = d.map(r => [
+            r.Date, 
+            r.State, 
+            r.District, 
+            r['Party Name'], 
+            r['Document Type'], 
+            r['Bank Name'], 
+            r['Executer Name'], 
+            r['Registry Amount'], 
+            r['Society Duty'], 
+            r['Total Fees'], 
+            r['Sales Person Fees'], 
+            r['Office Fees'], 
+            r['SRO Expenses'], 
+            r['Amount Submission']
+        ]);
+
+        doc.autoTable({ 
+            head: head, 
+            body: body, 
+            startY: 15, 
+            theme: 'grid',
+            styles: { fontSize: 7, cellPadding: 2 },
+            headStyles: { fillColor: [13, 110, 253] },
+            didDrawPage: function (data) {
+                // FOOTER: Copyright Notice on every page
+                doc.setFontSize(10);
+                doc.setTextColor(150);
+                const pageSize = doc.internal.pageSize;
+                const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+                doc.text("© GOVIND SINGH MAKRANA", data.settings.margin.left, pageHeight - 10);
+            }
+        });
+
         doc.save("Registry_Report.pdf");
     }
 </script>
 </body>
 </html>
-
