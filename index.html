@@ -46,10 +46,10 @@
                             <div class="col-12 calc-box mt-3">
                                 <div class="row g-2">
                                     <div class="col-6"><label class="small-label text-primary">Total Fees</label><input type="number" id="tFees" name="Total Fees" class="form-control border-primary" required></div>
-                                    <div class="col-6"><label class="small-label">Sales Fees</label><input type="number" id="sFees" name="Sales Person Fees" class="form-control" required></div>
+                                    <div class="col-6"><label class="small-label">Sales Commission</label><input type="number" id="sFees" name="Sales Person Fees" class="form-control" required></div>
                                     <div class="col-6"><label class="small-label text-muted">Office Fees</label><input type="number" id="oFees" name="Office Fees" class="form-control bg-light" readonly></div>
                                     <div class="col-6"><label class="small-label">SRO Exp.</label><input type="number" id="sro" name="SRO Expenses" class="form-control"></div>
-                                    <div class="col-12"><label class="small-label text-success">Submission (Office - SRO)</label><input type="number" id="aSub" name="Amount Submission" class="form-control final-amt" readonly></div>
+                                    <div class="col-12"><label class="small-label text-success">Amount Submission</label><input type="number" id="aSub" name="Amount Submission" class="form-control final-amt" readonly></div>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100 mt-3 fw-bold">SAVE TO SHEET</button>
@@ -95,7 +95,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6BG6UecnnaGNwixt1OKFTkK3C4JjhvjCgUSNI1IYJ7uVZwbv6Wzp4KnTAKFZx2Wn-/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwL9RXg8YoNNSzo88ohKcSLXudwv6GDn7P8Qan6fQsz8v1IlikRM7sZuQg5i_KcXIle/exec";
 
     // Auto Calc
     ['tFees', 'sFees', 'sro'].forEach(id => {
@@ -208,3 +208,4 @@
 </script>
 </body>
 </html>
+
