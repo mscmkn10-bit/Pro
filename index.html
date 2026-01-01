@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        body { background-color: #f4f7f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f4f7f9; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; min-height: 100vh; position: relative; padding-bottom: 60px; }
         #authOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0d6efd; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .auth-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; width: 100%; max-width: 400px; }
         #mainUI { display: none; padding: 20px; }
@@ -19,6 +19,9 @@
         input[type="text"] { text-transform: uppercase; }
         .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 2000; align-items: center; justify-content: center; }
         .small-label { font-size: 11px; font-weight: 700; color: #555; text-transform: uppercase; margin-bottom: 2px; display: block; }
+        
+        /* Web Page Copyright Footer */
+        .page-footer { position: fixed; bottom: 0; width: 100%; background: #fff; padding: 15px 0; text-align: center; font-weight: bold; color: #0d6efd; border-top: 2px solid #0d6efd; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -110,19 +113,23 @@
     </div>
 </div>
 
+<div class="page-footer" id="webFooter" style="display:none;">
+    © GOVIND SINGH MAKRANA
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwKlDVsLOsIqeLBb6mZFT8x33qLNxIaoHII9IMFq4RYA8OqkYjz1gNVtWs6JRKS-N4/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeUysoqOjKrYK_VeAGR_EyOG1XfOHtEAgDaxKRDNh5n38iLFCzfx60RCkgTESRI3dV/exec";
     const MASTER_PASS = "admin123";
 
     function checkPass() {
-        const input = document.getElementById('passInput').value;
-        if(input === MASTER_PASS) {
+        if(document.getElementById('passInput').value === MASTER_PASS) {
             document.getElementById('authOverlay').style.display = 'none';
             document.getElementById('mainUI').style.display = 'block';
+            document.getElementById('webFooter').style.display = 'block';
             syncData();
         } else {
             document.getElementById('errMsg').style.display = 'block';
@@ -168,10 +175,10 @@
     }
 
     function deleteEntry(rowId) {
-        if(confirm("Are you sure? This will delete the record from Google Sheets.")) {
+        if(confirm("Are you sure? This will delete record from Sheets.")) {
             document.getElementById('loader').style.display='flex';
             fetch(`${SCRIPT_URL}?action=delete&rowId=${rowId}`, {mode: 'no-cors'})
-            .then(() => { alert("Deleted!"); syncData(); });
+            .then(() => { syncData(); });
         }
     }
 
@@ -181,7 +188,7 @@
         if(!data || data.length === 0) return;
         [...data].reverse().forEach(r => {
             body.innerHTML += `<tr>
-                <td>${String(r.Date).split('T')[0]}</td>
+                <td>${r.Date}</td>
                 <td class="fw-bold">${r['Party Name']}</td>
                 <td>${r['Total Fees']}</td><td>${r['Office Fees']}</td><td>${r['SRO Expenses']}</td>
                 <td class="text-success fw-bold">${r['Amount Submission']}</td>
@@ -193,9 +200,17 @@
     function applyFilter() {
         const s = document.getElementById('sDate').value;
         const e = document.getElementById('eDate').value;
-        let d = JSON.parse(localStorage.getItem('regData')) || [];
-        if(s && e) d = d.filter(i => i.Date >= s && i.Date <= e);
-        render(d);
+        if(s && e){
+            const sDateObj = new Date(s);
+            const eDateObj = new Date(e);
+            let d = JSON.parse(localStorage.getItem('regData')) || [];
+            d = d.filter(i => {
+                const parts = i.Date.split('/');
+                const current = new Date(parts[2], parts[1]-1, parts[0]);
+                return current >= sDateObj && current <= eDateObj;
+            });
+            render(d);
+        } else { syncData(); }
     }
 
     function exportEx() {
@@ -211,11 +226,11 @@
         const doc = new jsPDF('l', 'mm', 'a4');
         const d = JSON.parse(localStorage.getItem('regData')) || [];
         
-        // PDF Columns Selection (Removed: Phone, E-Stamp, Reg Fees, SI/CSI, Per Challan)
-        const head = [['DATE', 'STATE', 'DISTRICT', 'PARTY NAME', 'DOC TYPE', 'BANK', 'EXECUTER', 'REG. AMT', 'SOCIETY', 'TOTAL FEES', 'SALES COMM.', 'OFFICE FEES', 'SRO EXP.', 'SUBMIT AMT']];
+        // Removed: Phone, E-Stamp, Reg Fees, SI/CSI, Per Challan, AND Society Duty
+        const head = [['DATE', 'STATE', 'DISTRICT', 'PARTY NAME', 'DOC TYPE', 'BANK', 'EXECUTER', 'REG. AMT', 'TOTAL FEES', 'SALES COMM.', 'OFFICE FEES', 'SRO EXP.', 'SUBMIT AMT']];
         
         const body = d.map(r => [
-            r.Date, 
+            r.Date, // Clean DD/MM/YYYY
             r.State, 
             r.District, 
             r['Party Name'], 
@@ -223,8 +238,7 @@
             r['Bank Name'], 
             r['Executer Name'], 
             r['Registry Amount'], 
-            r['Society Duty'], 
-            r['Total Fees'], 
+            r.Total Fees, 
             r['Sales Person Fees'], 
             r['Office Fees'], 
             r['SRO Expenses'], 
@@ -236,16 +250,8 @@
             body: body, 
             startY: 15, 
             theme: 'grid',
-            styles: { fontSize: 7, cellPadding: 2 },
-            headStyles: { fillColor: [13, 110, 253] },
-            didDrawPage: function (data) {
-                // FOOTER: Copyright Notice on every page
-                doc.setFontSize(10);
-                doc.setTextColor(150);
-                const pageSize = doc.internal.pageSize;
-                const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
-                doc.text("© GOVIND SINGH MAKRANA", data.settings.margin.left, pageHeight - 10);
-            }
+            styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+            headStyles: { fillColor: [13, 110, 253] }
         });
 
         doc.save("Registry_Report.pdf");
