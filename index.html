@@ -78,7 +78,7 @@
                                         <div class="col-12 mt-2">
                                             <label class="form-label text-success">Amount Submission (Final)</label>
                                             <input type="number" class="form-control final-box" id="amtSub" name="Amount Submission" readonly>
-                                            <small class="text-muted" style="font-size:0.7rem;">(Office Fees + SRO Expenses)</small>
+                                            <small class="text-muted" style="font-size:0.7rem;">(Sales Fees - SRO Exp)</small>
                                         </div>
                                     </div>
                                 </div>
@@ -153,14 +153,14 @@
 <script>
     // **********************************************
     // CONFIGURATION: अपना URL यहाँ पेस्ट करें
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSQsSAiMHe8oiv0XgqPJPECPpLcDqK2Z7mWWW20BCw1t52c3i6VaMLijh4dBLy8bR1/exec'; 
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqODi6oC3EGaSs2ME4lbw-A567JUvrlAcQGUog9T2V7j2SgIVPrVb1pgxd2OLmOUiJ/exec'; 
     // **********************************************
 
     const form = document.getElementById('registryForm');
     const tableBody = document.getElementById('tableBody');
     const loader = document.getElementById('loader');
 
-    // --- Calculation Logic (Revised) ---
+    // --- Calculation Logic (Revised as per User Request) ---
     const calcIds = ['totalFees', 'salesFees', 'sroExp'];
     calcIds.forEach(id => document.getElementById(id).addEventListener('input', calculateValues));
 
@@ -173,9 +173,8 @@
         const officeFees = total - sales;
         document.getElementById('officeFees').value = officeFees;
 
-        // 2. Submission = Office Fees + SRO Expenses
-        // (SRO expenses are added back to submission because they are deducted from Sales Person implicitly)
-        const submission = officeFees + sro;
+        // 2. Amount Submission = Sales Person Fees - SRO Expenses (NEW LOGIC)
+        const submission = sales - sro;
         document.getElementById('amtSub').value = submission;
     }
 
