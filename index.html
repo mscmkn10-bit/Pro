@@ -3,76 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registry Pro - Govind Singh Makrana</title>
+    <title>Registry Professional Suite</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
-        body { background-color: #f4f7f9; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
-        
-        /* Force Login Screen on Top */
-        #authOverlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #0d6efd; z-index: 99999; display: flex; 
-            align-items: center; justify-content: center; 
-        }
-        .auth-card { 
-            background: white; padding: 40px; border-radius: 20px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3); text-align: center; 
-            width: 95%; max-width: 400px; 
-        }
-
-        /* Main Dashboard - Hidden by Default */
+        body { background-color: #f4f7f9; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 70px; }
+        #authOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0d6efd; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .auth-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; width: 100%; max-width: 400px; }
         #mainUI { display: none; padding: 20px; }
-        
         .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .card-header { background: #0d6efd; color: white; font-weight: bold; font-size: 1.1rem; }
-        
-        .calc-box { background: #fffceb; border: 1px solid #f9e79f; border-radius: 10px; padding: 15px; margin-top: 15px; }
-        .final-amt { background: #d1e7dd !important; font-weight: bold; border: 2px solid #198754 !important; color: #198754; font-size: 1.2rem; }
-        
+        .card-header { background: #0d6efd; color: white; font-weight: bold; border-radius: 12px 12px 0 0 !important; }
+        .calc-box { background: #fffceb; border: 1px solid #f9e79f; border-radius: 8px; padding: 15px; margin-top: 15px; }
+        .final-amt { background: #d1e7dd !important; font-weight: bold; border: 2px solid #198754 !important; color: #198754; }
         input[type="text"] { text-transform: uppercase; }
-        
-        /* Loader Overlay */
-        .loading-overlay { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(255,255,255,0.8); z-index: 100000; align-items: center; justify-content: center; 
-        }
-        
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 2000; align-items: center; justify-content: center; }
         .small-label { font-size: 11px; font-weight: 700; color: #555; text-transform: uppercase; margin-bottom: 2px; display: block; }
-        
-        /* Web Page Copyright Footer */
-        .page-footer { 
-            position: fixed; bottom: 0; width: 100%; background: #ffffff; 
-            padding: 15px; text-align: center; font-weight: bold; 
-            color: #0d6efd; border-top: 3px solid #0d6efd; z-index: 1000;
-        }
+        .page-footer { position: fixed; bottom: 0; width: 100%; background: #fff; padding: 15px 0; text-align: center; font-weight: bold; color: #0d6efd; border-top: 2px solid #0d6efd; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
 <div id="authOverlay">
     <div class="auth-card">
-        <i class="fas fa-user-shield fa-4x text-primary mb-4"></i>
-        <h3 class="mb-3">Registry System Login</h3>
-        <input type="password" id="passInput" class="form-control form-control-lg mb-3 text-center" placeholder="ENTER PASSWORD">
-        <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="checkPass()">UNLOCK ACCESS</button>
+        <i class="fas fa-user-lock fa-4x text-primary mb-4"></i>
+        <h3 class="mb-3">Registry Login</h3>
+        <input type="password" id="passInput" class="form-control form-control-lg mb-3 text-center" placeholder="Enter Password">
+        <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="checkPass()">UNLOCK SYSTEM</button>
         <p id="errMsg" class="text-danger mt-3 fw-bold" style="display:none;">Access Denied! Incorrect Password.</p>
     </div>
 </div>
 
 <div class="loading-overlay" id="loader">
     <div class="text-center">
-        <div class="spinner-border text-primary" role="status" style="width: 3.5rem; height: 3.5rem;"></div>
-        <p class="mt-2 fw-bold text-primary">Syncing Data...</p>
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+        <p class="mt-2 fw-bold">Syncing Records...</p>
     </div>
 </div>
 
 <div id="mainUI" class="container-fluid">
     <div class="row">
-        <div class="col-xl-4 col-lg-5">
+        <div class="col-lg-4">
             <div class="card">
-                <div class="card-header"><i class="fas fa-file-signature me-2"></i>Entry Form</div>
+                <div class="card-header">NEW REGISTRY ENTRY</div>
                 <div class="card-body">
                     <form id="regForm">
                         <div class="row g-2">
@@ -86,7 +58,7 @@
                             <div class="col-6"><span class="small-label">Registry Amount</span><input type="number" name="Registry Amount" class="form-control"></div>
                             <div class="col-6"><span class="small-label">Society Duty</span><input type="number" name="Society Duty" class="form-control"></div>
                             <div class="col-6"><span class="small-label">Stamp Duty/SC</span><input type="number" name="Stamp Duty/SC" class="form-control"></div>
-                            <div class="col-6"><span class="small-label">Registration Fees</span><input type="number" name="Registration Fees" class="form-control"></div>
+                            <div class="col-6"><span class="small-label">Reg. Fees</span><input type="number" name="Registration Fees" class="form-control"></div>
                             <div class="col-6"><span class="small-label">SI/CSI</span><input type="number" name="SI/CSI" class="form-control"></div>
                             <div class="col-12"><span class="small-label">Per Challan</span><input type="text" name="Per Challan" class="form-control"></div>
                             
@@ -95,8 +67,8 @@
                                     <div class="col-6"><span class="small-label text-primary">Total Fees</span><input type="number" id="tFees" name="Total Fees" class="form-control" required></div>
                                     <div class="col-6"><span class="small-label">Sales Comm.</span><input type="number" id="sFees" name="Sales Person Fees" class="form-control" required></div>
                                     <div class="col-6"><span class="small-label">Office Fees</span><input type="number" id="oFees" name="Office Fees" class="form-control" readonly></div>
-                                    <div class="col-6"><span class="small-label text-danger">SRO Expenses</span><input type="number" id="sro" name="SRO Expenses" class="form-control"></div>
-                                    <div class="col-12"><span class="small-label text-success fw-bold">Amount Submission</span><input type="number" id="aSub" name="Amount Submission" class="form-control final-amt" readonly></div>
+                                    <div class="col-6"><span class="small-label">SRO Expenses</span><input type="number" id="sro" name="SRO Expenses" class="form-control"></div>
+                                    <div class="col-12"><span class="small-label text-success">Final Submission Amount</span><input type="number" id="aSub" name="Amount Submission" class="form-control final-amt" readonly></div>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100 mt-3 py-2 fw-bold">SAVE TO GOOGLE SHEET</button>
@@ -106,10 +78,10 @@
             </div>
         </div>
 
-        <div class="col-xl-8 col-lg-7">
+        <div class="col-lg-8">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-database me-2"></i>DATABASE RECORDS</span>
+                    <span>DATABASE RECORDS</span>
                     <button class="btn btn-sm btn-light text-primary fw-bold" onclick="syncData()">REFRESH</button>
                 </div>
                 <div class="card-body">
@@ -122,7 +94,7 @@
                             <button class="btn btn-danger" onclick="exportPd()"><i class="fas fa-file-pdf"></i></button>
                         </div>
                     </div>
-                    <div class="table-responsive" style="max-height: 550px;">
+                    <div class="table-responsive" style="max-height: 500px;">
                         <table class="table table-bordered table-sm table-hover text-center align-middle">
                             <thead class="table-dark">
                                 <tr>
@@ -138,33 +110,27 @@
     </div>
 </div>
 
-<div class="page-footer" id="webFooter" style="display:none;">
-    © GOVIND SINGH MAKRANA
-</div>
+<div class="page-footer" id="footer" style="display:none;">© GOVIND SINGH MAKRANA</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    // --- 1. CONFIGURATION ---
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYALp_1Ti7kEV80TLlTx17sH6iITeYyqbQ-hhzV2MHEaeL6apZ5FkiBCxevZI1Dgqv/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyQkJ1e_1YT0vTWCqmGhsHT756EwK97LIv-flW4KbvOCOXtBDwjOmM3d3UhTKHgP73w/exec";
     const MASTER_PASS = "admin123";
 
-    // --- 2. LOGIN LOGIC ---
     function checkPass() {
-        const input = document.getElementById('passInput').value;
-        if(input === MASTER_PASS) {
+        if(document.getElementById('passInput').value === MASTER_PASS) {
             document.getElementById('authOverlay').style.display = 'none';
             document.getElementById('mainUI').style.display = 'block';
-            document.getElementById('webFooter').style.display = 'block';
+            document.getElementById('footer').style.display = 'block';
             syncData();
         } else {
             document.getElementById('errMsg').style.display = 'block';
         }
     }
 
-    // --- 3. AUTO CALCULATIONS ---
     ['tFees', 'sFees', 'sro'].forEach(id => {
         document.getElementById(id).addEventListener('input', () => {
             const t = parseFloat(document.getElementById('tFees').value) || 0;
@@ -175,7 +141,6 @@
         });
     });
 
-    // --- 4. DATA OPERATIONS ---
     document.getElementById('regForm').addEventListener('submit', function(e) {
         e.preventDefault();
         document.getElementById('loader').style.display='flex';
@@ -186,9 +151,9 @@
         
         fetch(SCRIPT_URL, { method: 'POST', body: params, mode: 'no-cors' })
         .then(() => { 
-            alert("Entry Saved to Google Sheets!"); 
+            alert("Entry Saved!"); 
             this.reset(); 
-            setTimeout(syncData, 1500); 
+            setTimeout(syncData, 1000); 
         })
         .finally(() => document.getElementById('loader').style.display='none');
     });
@@ -204,53 +169,41 @@
         .finally(() => document.getElementById('loader').style.display='none');
     }
 
-    function deleteRow(id) {
-        if(confirm("Confirm: Delete this record permanently from Sheet?")) {
-            document.getElementById('loader').style.display='flex';
-            fetch(`${SCRIPT_URL}?action=delete&rowId=${id}`, {mode: 'no-cors'})
-            .then(() => { syncData(); });
-        }
-    }
-
     function render(data) {
         const body = document.getElementById('tBody');
         body.innerHTML = '';
         if(!data || data.length === 0) return;
         [...data].reverse().forEach(r => {
-            // Remove time string if it exists
-            const cleanDate = String(r.Date).split('T')[0];
             body.innerHTML += `<tr>
-                <td>${cleanDate}</td>
+                <td>${r.Date}</td>
                 <td class="fw-bold">${r['Party Name']}</td>
                 <td>${r['Total Fees']}</td><td>${r['Office Fees']}</td><td>${r['SRO Expenses']}</td>
                 <td class="text-success fw-bold">${r['Amount Submission']}</td>
-                <td><button class="btn btn-sm text-danger" onclick="deleteRow(${r.rowId})"><i class="fas fa-trash-alt"></i></button></td>
+                <td><button class="btn btn-sm btn-danger" onclick="deleteEntry(${r.rowId})"><i class="fas fa-trash"></i></button></td>
             </tr>`;
         });
     }
 
     function applyFilter() {
-        const s = document.getElementById('sDate').value;
+        const s = document.getElementById('sDate').value; // Format: yyyy-mm-dd
         const e = document.getElementById('eDate').value;
-        if(!s || !e) { syncData(); return; }
-        
-        const sD = new Date(s); const eD = new Date(e);
+        if(!s || !e) return syncData();
+
         let d = JSON.parse(localStorage.getItem('regData')) || [];
         d = d.filter(i => {
-            const parts = i.Date.split('/');
-            const curr = new Date(parts[2], parts[1]-1, parts[0]);
-            return curr >= sD && curr <= eD;
+            const parts = i.Date.split('/'); // dd/mm/yyyy
+            const formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`; // yyyy-mm-dd
+            return formattedDate >= s && formattedDate <= e;
         });
         render(d);
     }
 
-    // --- 5. EXPORT LOGIC ---
     function exportEx() {
         const d = JSON.parse(localStorage.getItem('regData')) || [];
         const ws = XLSX.utils.json_to_sheet(d);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Database");
-        XLSX.writeFile(wb, "Registry_Excel_Report.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "Records");
+        XLSX.writeFile(wb, "Registry_Data.xlsx");
     }
 
     function exportPd() {
@@ -258,27 +211,23 @@
         const doc = new jsPDF('l', 'mm', 'a4');
         const d = JSON.parse(localStorage.getItem('regData')) || [];
         
-        // Final Removed: Phone, E-Stamp, Reg Fees, SI/CSI, Per Challan AND Society Duty
-        const head = [['DATE', 'STATE', 'DISTRICT', 'PARTY NAME', 'DOC TYPE', 'BANK', 'EXECUTER', 'REG. AMT', 'TOTAL FEES', 'SALES COMM.', 'OFFICE FEES', 'SRO EXP.', 'NET SUBMIT']];
-        
+        const head = [['DATE', 'STATE', 'DISTRICT', 'PARTY NAME', 'DOC TYPE', 'BANK', 'EXECUTER', 'REG. AMT', 'TOTAL FEES', 'SALES', 'OFFICE', 'SRO', 'SUBMIT']];
         const body = d.map(r => [
-            String(r.Date).split('T')[0], // Clean Date
-            r.State, r.District, r['Party Name'], r['Document Type'], 
+            r.Date, r.State, r.District, r['Party Name'], r['Document Type'], 
             r['Bank Name'], r['Executer Name'], r['Registry Amount'], 
             r['Total Fees'], r['Sales Person Fees'], r['Office Fees'], 
             r['SRO Expenses'], r['Amount Submission']
         ]);
 
-        doc.autoTable({ 
-            head: head, 
-            body: body, 
-            startY: 15, 
-            theme: 'grid', 
-            styles: { fontSize: 8, cellPadding: 2 },
-            headStyles: { fillColor: [13, 110, 253] }
-        });
-
+        doc.autoTable({ head, body, startY: 15, theme: 'grid', styles: {fontSize: 8} });
         doc.save("Registry_Report.pdf");
+    }
+
+    function deleteEntry(id) {
+        if(confirm("Confirm deletion from Google Sheets?")) {
+            document.getElementById('loader').style.display='flex';
+            fetch(`${SCRIPT_URL}?action=delete&rowId=${id}`, {mode: 'no-cors'}).then(() => syncData());
+        }
     }
 </script>
 </body>
