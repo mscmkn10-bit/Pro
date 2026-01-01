@@ -10,10 +10,12 @@
         body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .card { border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 12px; margin-bottom: 20px; }
         .card-header { background: linear-gradient(135deg, #0d6efd, #0a58ca); color: white; border-radius: 12px 12px 0 0 !important; font-weight: bold; }
-        .form-label { font-weight: 600; font-size: 0.9rem; color: #555; }
-        .total-box { background-color: #e9ecef; border: 1px solid #ced4da; font-weight: bold; color: #0d6efd; }
+        .form-label { font-weight: 600; font-size: 0.85rem; color: #555; }
+        .calc-section { background-color: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; padding: 15px; }
+        .total-box { background-color: #fff; border: 2px solid #0d6efd; font-weight: bold; color: #0d6efd; }
+        .final-box { background-color: #d1e7dd; border: 2px solid #198754; color: #146c43; font-weight: bold; font-size: 1.1rem; }
         .btn-custom { border-radius: 8px; font-weight: 600; padding: 10px 20px; }
-        table { font-size: 0.9rem; }
+        table { font-size: 0.8rem; white-space: nowrap; }
         thead { background-color: #0d6efd; color: white; }
         .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; align-items: center; justify-content: center; }
     </style>
@@ -26,57 +28,64 @@
     </div>
 </div>
 
-<div class="container-fluid py-4">
+<div class="container-fluid py-3">
     <div class="row">
         <div class="col-lg-4">
             <div class="card">
-                <div class="card-header"><i class="fas fa-file-invoice me-2"></i>New Entry</div>
+                <div class="card-header"><i class="fas fa-edit me-2"></i>New Registry Entry</div>
                 <div class="card-body">
                     <form id="registryForm">
                         <div class="row g-2">
-                            <div class="col-6"><label class="form-label">State</label><input type="text" class="form-control" name="State" required></div>
-                            <div class="col-6"><label class="form-label">District</label><input type="text" class="form-control" name="District" required></div>
-                            <div class="col-12"><label class="form-label">Party Name</label><input type="text" class="form-control" name="Party Name" required></div>
-                            <div class="col-6"><label class="form-label">Bank Name</label><input type="text" class="form-control" name="Bank Name"></div>
-                            <div class="col-6"><label class="form-label">Executor Name</label><input type="text" class="form-control" name="Executor Name"></div>
-                            <div class="col-12"><label class="form-label">Phone Number</label><input type="number" class="form-control" name="Phone"></div>
+                            <div class="col-6"><label class="form-label">State</label><input type="text" class="form-control form-control-sm" name="State" required></div>
+                            <div class="col-6"><label class="form-label">District</label><input type="text" class="form-control form-control-sm" name="District" required></div>
+                            <div class="col-12"><label class="form-label">Party Name</label><input type="text" class="form-control form-control-sm" name="Party Name" required></div>
+                            <div class="col-6"><label class="form-label">Bank Name</label><input type="text" class="form-control form-control-sm" name="Bank Name"></div>
+                            <div class="col-6"><label class="form-label">Executer Name</label><input type="text" class="form-control form-control-sm" name="Executer Name"></div>
+                            <div class="col-6"><label class="form-label">Phone No.</label><input type="number" class="form-control form-control-sm" name="Phone No."></div>
                             
-                            <hr class="my-3">
-                            
-                            <div class="col-6"><label class="form-label">Registry Amount</label><input type="number" class="form-control" name="Registry Amount"></div>
-                            <div class="col-6"><label class="form-label">Society Duty</label><input type="number" class="form-control" name="Society Duty"></div>
-                            <div class="col-6"><label class="form-label">Registration Fees</label><input type="number" class="form-control" name="Reg Fees"></div>
-                            <div class="col-6"><label class="form-label">SC/CSI</label><input type="number" class="form-control" name="SC/CSI"></div>
-                            
-                            <div class="col-12 bg-light p-2 border rounded mt-2">
-                                <h6 class="text-primary border-bottom pb-1">Calculation Section</h6>
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <label class="form-label">Per Challan Total</label>
-                                        <input type="number" class="form-control" id="totalFees" name="Per Challan Total" required>
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="form-label">Sales Person Fees</label>
-                                        <input type="number" class="form-control" id="salesFees" name="Sales Person Fees" required>
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="form-label">SRO Expenses</label>
-                                        <input type="number" class="form-control" id="sroExp" name="SRO Expenses">
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="form-label">Office Fees (Auto)</label>
-                                        <input type="number" class="form-control total-box" id="officeFees" name="Office Fees" readonly>
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label text-success">Amount Submission (Final)</label>
-                                        <input type="number" class="form-control total-box" id="amtSub" name="Amount Submission" readonly>
-                                        <small class="text-muted" style="font-size: 0.75rem;">(Office Fees + SRO Expenses)</small>
+                            <div class="col-6"><label class="form-label">Registry Amount</label><input type="number" class="form-control form-control-sm" name="Registry Amount"></div>
+                            <div class="col-6"><label class="form-label">Society Duty</label><input type="number" class="form-control form-control-sm" name="Society Duty"></div>
+                            <div class="col-6"><label class="form-label">E-Stamp</label><input type="number" class="form-control form-control-sm" name="E-Stamp"></div>
+                            <div class="col-6"><label class="form-label">Registration Fees</label><input type="number" class="form-control form-control-sm" name="Registration Fees"></div>
+                            <div class="col-6"><label class="form-label">SI/CSI</label><input type="number" class="form-control form-control-sm" name="SI/CSI"></div>
+                            <div class="col-6"><label class="form-label">Per Challan</label><input type="text" class="form-control form-control-sm" name="Per Challan"></div>
+
+                            <div class="col-12 mt-3">
+                                <div class="calc-section">
+                                    <h6 class="text-primary border-bottom pb-2 mb-2"><i class="fas fa-calculator me-1"></i> Fee Calculation</h6>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <label class="form-label text-primary">Total Fees (Input)</label>
+                                            <input type="number" class="form-control total-box" id="totalFees" name="Total Fees" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">Sales Person Fees</label>
+                                            <input type="number" class="form-control" id="salesFees" name="Sales Person Fees" required>
+                                        </div>
+                                        
+                                        <div class="col-12"><hr class="my-1"></div>
+
+                                        <div class="col-6">
+                                            <label class="form-label">Office Fees (Auto)</label>
+                                            <input type="number" class="form-control bg-light" id="officeFees" name="Office Fees" readonly>
+                                            <small class="text-muted" style="font-size:0.7rem;">(Total - Sales)</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">SRO Expenses</label>
+                                            <input type="number" class="form-control" id="sroExp" name="SRO Expenses">
+                                        </div>
+
+                                        <div class="col-12 mt-2">
+                                            <label class="form-label text-success">Amount Submission (Final)</label>
+                                            <input type="number" class="form-control final-box" id="amtSub" name="Amount Submission" readonly>
+                                            <small class="text-muted" style="font-size:0.7rem;">(Office Fees + SRO Expenses)</small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-12 mt-3">
-                                <button type="submit" class="btn btn-primary w-100 btn-custom"><i class="fas fa-save me-2"></i>Submit & Save</button>
+                                <button type="submit" class="btn btn-primary w-100 btn-custom"><i class="fas fa-save me-2"></i>Submit Record</button>
                             </div>
                         </div>
                     </form>
@@ -86,35 +95,33 @@
 
         <div class="col-lg-8">
             <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-database me-2"></i>Records (Date Wise)</span>
+                <div class="card-header d-flex justify-content-between align-items-center py-2">
+                    <span><i class="fas fa-table me-2"></i>Saved Records</span>
                     <button class="btn btn-light btn-sm text-primary fw-bold" onclick="syncWithGoogleSheet()">
-                        <i class="fas fa-sync-alt me-1"></i> Fetch from Excel
+                        <i class="fas fa-sync-alt me-1"></i> Fetch Data
                     </button>
                 </div>
-                <div class="card-body">
-                    <div class="row g-2 mb-3 align-items-end">
+                <div class="card-body p-2">
+                    <div class="row g-2 mb-3">
                         <div class="col-md-3">
-                            <label class="form-label">From Date</label>
-                            <input type="date" id="startDate" class="form-control">
+                            <input type="date" id="startDate" class="form-control form-control-sm">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">To Date</label>
-                            <input type="date" id="endDate" class="form-control">
+                            <input type="date" id="endDate" class="form-control form-control-sm">
                         </div>
                         <div class="col-md-2">
-                            <button class="btn btn-secondary w-100" onclick="filterData()">Filter</button>
+                            <button class="btn btn-secondary btn-sm w-100" onclick="filterData()">Filter</button>
                         </div>
                         <div class="col-md-2">
-                            <button class="btn btn-danger w-100" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                            <button class="btn btn-success btn-sm w-100" onclick="exportExcel()">Excel</button>
                         </div>
                         <div class="col-md-2">
-                            <button class="btn btn-success w-100" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+                            <button class="btn btn-danger btn-sm w-100" onclick="exportPDF()">PDF</button>
                         </div>
                     </div>
 
-                    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
-                        <table class="table table-bordered table-hover table-striped" id="dataTable">
+                    <div class="table-responsive" style="height: 600px; overflow: auto;">
+                        <table class="table table-bordered table-striped table-hover table-sm">
                             <thead class="position-sticky top-0">
                                 <tr>
                                     <th>Date</th>
@@ -124,7 +131,8 @@
                                     <th>Office Fees</th>
                                     <th>SRO Exp</th>
                                     <th>Submission</th>
-                                    <th>Details</th>
+                                    <th>District</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody">
@@ -144,86 +152,76 @@
 
 <script>
     // **********************************************
-    // CONFIGURATION
-    // **********************************************
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdQXBMEQ1wSRIMx_9m80S97VX45O4bUGq5FgEePSQg59wt2xZ8VS8fDa_pxakH2Fmu/exec'; // यहाँ अपना Google App Script URL पेस्ट करें
+    // CONFIGURATION: अपना URL यहाँ पेस्ट करें
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSQsSAiMHe8oiv0XgqPJPECPpLcDqK2Z7mWWW20BCw1t52c3i6VaMLijh4dBLy8bR1/exec'; 
     // **********************************************
 
     const form = document.getElementById('registryForm');
     const tableBody = document.getElementById('tableBody');
     const loader = document.getElementById('loader');
 
-    // 1. Live Calculation Logic
-    const calcInputs = ['totalFees', 'salesFees', 'sroExp'];
-    calcInputs.forEach(id => {
-        document.getElementById(id).addEventListener('input', calculateValues);
-    });
+    // --- Calculation Logic (Revised) ---
+    const calcIds = ['totalFees', 'salesFees', 'sroExp'];
+    calcIds.forEach(id => document.getElementById(id).addEventListener('input', calculateValues));
 
     function calculateValues() {
         const total = parseFloat(document.getElementById('totalFees').value) || 0;
         const sales = parseFloat(document.getElementById('salesFees').value) || 0;
         const sro = parseFloat(document.getElementById('sroExp').value) || 0;
 
-        // Logic 1: Office Fees = Total - Sales
+        // 1. Office Fees = Total Fees - Sales Person Fees
         const officeFees = total - sales;
         document.getElementById('officeFees').value = officeFees;
 
-        // Logic 2: Amount Submission (User Requirement: Minus SRO from Sales, Add to Submission)
-        // Interpretation: Sales person gets (Sales - SRO). The deducted SRO amount goes to Office submission.
-        // So, Submission = Office Fees + SRO.
+        // 2. Submission = Office Fees + SRO Expenses
+        // (SRO expenses are added back to submission because they are deducted from Sales Person implicitly)
         const submission = officeFees + sro;
         document.getElementById('amtSub').value = submission;
     }
 
-    // 2. Load Data on Startup
+    // --- On Load ---
     window.addEventListener('load', () => {
         loadFromLocal();
-        // Set date inputs to current month for convenience
         const date = new Date();
         document.getElementById('startDate').value = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
         document.getElementById('endDate').value = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
     });
 
-    // 3. Form Submission
+    // --- Form Submit ---
     form.addEventListener('submit', e => {
         e.preventDefault();
         loader.style.display = 'flex';
 
         const formData = new FormData(form);
         const dataObj = {};
-        
-        // Convert FormData to Object
         formData.forEach((value, key) => dataObj[key] = value);
         
-        // Add Date explicitly for sorting
-        const today = new Date();
-        dataObj['Date'] = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+        // Add Date
+        dataObj['Date'] = new Date().toISOString().split('T')[0];
 
-        // A. Save to LocalStorage immediately
+        // Save Local
         saveToLocal(dataObj);
 
-        // B. Send to Google Sheets (Backend)
+        // Save Sheet
         fetch(SCRIPT_URL, {
             method: 'POST',
             body: new URLSearchParams(dataObj)
         })
-        .then(response => response.json())
-        .then(response => {
-            console.log('Saved to Sheet:', response);
-            alert("Data Saved Successfully to Backend & Browser!");
+        .then(res => res.json())
+        .then(res => {
+            alert("Data Saved Successfully!");
             form.reset();
-            calculateValues(); // Reset calculations
+            calculateValues();
             loader.style.display = 'none';
         })
-        .catch(error => {
-            console.error('Error!', error.message);
-            alert("Saved to Browser only. Internet Issue with Sheet.");
+        .catch(err => {
+            alert("Saved to Browser (Offline Mode). Sheet update failed.");
             loader.style.display = 'none';
             form.reset();
         });
     });
 
-    // 4. LocalStorage Handling
+    // --- Local Storage ---
     function saveToLocal(data) {
         let records = JSON.parse(localStorage.getItem('registryData')) || [];
         records.push(data);
@@ -236,134 +234,126 @@
         renderTable(records);
     }
 
-    // 5. Fetch from Google Sheets (Sync Button)
+    // --- Google Sheet Sync ---
     function syncWithGoogleSheet() {
         loader.style.display = 'flex';
         fetch(SCRIPT_URL + "?action=read")
         .then(res => res.json())
         .then(json => {
             if(json.status === 'success') {
-                // Convert Google Sheet Date format to YYYY-MM-DD
                 const cleanData = json.data.map(item => {
-                    if(item.Date) {
-                        let d = new Date(item.Date);
-                        item.Date = d.toISOString().split('T')[0];
-                    }
+                    if(item.Date) item.Date = new Date(item.Date).toISOString().split('T')[0];
                     return item;
                 });
-                
-                // Update LocalStorage with Sheet Data (Master Copy)
                 localStorage.setItem('registryData', JSON.stringify(cleanData));
                 renderTable(cleanData);
-                alert("Data synced with Excel successfully!");
+                alert("Data synced from Excel!");
             }
             loader.style.display = 'none';
         })
-        .catch(e => {
-            alert("Error fetching data");
-            loader.style.display = 'none';
-        });
+        .catch(e => { loader.style.display = 'none'; alert("Sync Error"); });
     }
 
-    // 6. Render Table
+    // --- Render Table ---
     function renderTable(data) {
         tableBody.innerHTML = '';
-        // Sort by Date (Newest first)
-        data.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+        data.sort((a, b) => new Date(b.Date) - new Date(a.Date)); // Sort Newest First
 
         data.forEach(row => {
             const tr = document.createElement('tr');
+            // Showing key columns for overview
             tr.innerHTML = `
-                <td>${row.Date || ''}</td>
-                <td class="fw-bold">${row['Party Name'] || ''}</td>
-                <td>${row['Per Challan Total'] || 0}</td>
+                <td>${row.Date}</td>
+                <td class="fw-bold text-primary">${row['Party Name']}</td>
+                <td>${row['Total Fees'] || 0}</td>
                 <td>${row['Sales Person Fees'] || 0}</td>
                 <td>${row['Office Fees'] || 0}</td>
                 <td>${row['SRO Expenses'] || 0}</td>
-                <td class="text-success fw-bold">${row['Amount Submission'] || 0}</td>
-                <td><button class="btn btn-sm btn-info text-white" onclick='showFullDetails(${JSON.stringify(row)})'>View</button></td>
+                <td class="fw-bold text-success">${row['Amount Submission'] || 0}</td>
+                <td>${row['District'] || ''}</td>
+                <td><button class="btn btn-xs btn-info text-white" onclick='showDetails(${JSON.stringify(row)})'><i class="fas fa-eye"></i></button></td>
             `;
             tableBody.appendChild(tr);
         });
     }
 
-    function showFullDetails(data) {
-        let details = "";
-        for (const [key, value] of Object.entries(data)) {
-            details += `${key}: ${value}\n`;
-        }
-        alert(details);
+    function showDetails(data) {
+        let txt = "";
+        // Display in Screenshot Order
+        const order = ['Date', 'State', 'District', 'Party Name', 'Bank Name', 'Executer Name', 'Phone No.', 
+                       'Registry Amount', 'Society Duty', 'E-Stamp', 'Registration Fees', 'SI/CSI', 'Per Challan', 
+                       'Total Fees', 'Sales Person Fees', 'Office Fees', 'SRO Expenses', 'Amount Submission'];
+        
+        order.forEach(key => {
+            if(data[key]) txt += `${key}: ${data[key]}\n`;
+        });
+        alert(txt);
     }
 
-    // 7. Filter Logic
+    // --- Filter ---
     function filterData() {
         const start = document.getElementById('startDate').value;
         const end = document.getElementById('endDate').value;
         let records = JSON.parse(localStorage.getItem('registryData')) || [];
-
-        if (start && end) {
-            records = records.filter(item => {
-                return item.Date >= start && item.Date <= end;
-            });
-        }
+        if (start && end) records = records.filter(item => item.Date >= start && item.Date <= end);
         renderTable(records);
     }
 
-    // 8. Export to Excel
+    // --- Export Excel (Matching Screenshot Columns) ---
     function exportExcel() {
-        let data = getCurrentTableData();
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "RegistryData");
-        XLSX.writeFile(wb, "Registry_Data.xlsx");
-    }
-
-    // 9. Export to PDF
-    function exportPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        let data = getCurrentTableData();
-        
-        // Prepare data for autotable
-        const tableColumn = ["Date", "Party", "District", "Total Fees", "Sales Fees", "Office Fees", "Submission"];
-        const tableRows = [];
-
-        data.forEach(row => {
-            const rowData = [
-                row.Date,
-                row['Party Name'],
-                row['District'],
-                row['Per Challan Total'],
-                row['Sales Person Fees'],
-                row['Office Fees'],
-                row['Amount Submission']
-            ];
-            tableRows.push(rowData);
-        });
-
-        doc.text("Registry Report", 14, 15);
-        doc.autoTable({
-            head: [tableColumn],
-            body: tableRows,
-            startY: 20,
-        });
-        doc.save("Registry_Report.pdf");
-    }
-
-    // Helper to get currently displayed data for export
-    function getCurrentTableData() {
-        // Logic: Filter again based on current inputs to ensure what user sees is what they get
+        let records = JSON.parse(localStorage.getItem('registryData')) || [];
+        // Filter if needed
         const start = document.getElementById('startDate').value;
         const end = document.getElementById('endDate').value;
-        let records = JSON.parse(localStorage.getItem('registryData')) || [];
-        
-        if (start && end) {
-            records = records.filter(item => item.Date >= start && item.Date <= end);
-        }
-        // Sort
+        if (start && end) records = records.filter(item => item.Date >= start && item.Date <= end);
         records.sort((a, b) => new Date(b.Date) - new Date(a.Date));
-        return records;
+
+        // Create ordered data for Excel
+        const orderedData = records.map(row => ({
+            'Date': row.Date,
+            'State': row.State,
+            'District': row.District,
+            'Party Name': row['Party Name'],
+            'Bank Name': row['Bank Name'],
+            'Executer Name': row['Executer Name'],
+            'Phone No.': row['Phone No.'],
+            'Registry Amount': row['Registry Amount'],
+            'Society Duty': row['Society Duty'],
+            'E-Stamp': row['E-Stamp'],
+            'Registration Fees': row['Registration Fees'],
+            'SI/CSI': row['SI/CSI'],
+            'Per Challan': row['Per Challan'],
+            'Total Fees': row['Total Fees'],
+            'Sales Person Fees': row['Sales Person Fees'],
+            'Office Fees': row['Office Fees'],
+            'SRO Expenses': row['SRO Expenses'],
+            'Amount Submission': row['Amount Submission']
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(orderedData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "RegistryData");
+        XLSX.writeFile(wb, "Registry_Report.xlsx");
+    }
+
+    function exportPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l'); // Landscape
+        doc.text("Registry Report", 14, 15);
+        
+        let records = JSON.parse(localStorage.getItem('registryData')) || [];
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+        if (start && end) records = records.filter(item => item.Date >= start && item.Date <= end);
+
+        const tableColumn = ["Date", "Party Name", "Total Fees", "Sales Fees", "Office Fees", "SRO Exp", "Submission"];
+        const tableRows = records.map(row => [
+            row.Date, row['Party Name'], row['Total Fees'], row['Sales Person Fees'], 
+            row['Office Fees'], row['SRO Expenses'], row['Amount Submission']
+        ]);
+
+        doc.autoTable({ head: [tableColumn], body: tableRows, startY: 20 });
+        doc.save("Registry_Report.pdf");
     }
 </script>
 
