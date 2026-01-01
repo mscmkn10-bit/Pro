@@ -7,24 +7,32 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #f1f3f8; font-family: 'Segoe UI', sans-serif; }
+        /* Security Lock Overlay */
+        #authOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f1f3f8; z-index: 3000; display: flex; align-items: center; justify-content: center; }
+        .auth-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; }
+        
+        body { background-color: #f1f3f8; font-family: 'Segoe UI', sans-serif; display: none; }
         .card { border-radius: 15px; border: none; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
         .card-header { background: #0d6efd; color: white; font-weight: bold; }
         .calc-box { background: #fff9db; border: 1px solid #f9e79f; border-radius: 10px; padding: 15px; }
         .final-amt { background: #d4edda !important; font-weight: bold; border: 2px solid #28a745 !important; }
         input[type="text"] { text-transform: uppercase; }
-        .watermark-container { position: relative; overflow: hidden; }
-        .watermark-text {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 3rem; color: rgba(0, 0, 0, 0.05); font-weight: bold; pointer-events: none; z-index: 0;
-            width: 100%; text-align: center;
-        }
         .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 2000; align-items: center; justify-content: center; }
-        .table-responsive { position: relative; z-index: 1; max-height: 550px; overflow-y: auto; }
+        .table-responsive { max-height: 550px; overflow-y: auto; }
         .small-label { font-size: 0.75rem; font-weight: 700; color: #444; }
     </style>
 </head>
 <body>
+
+<div id="authOverlay">
+    <div class="auth-card">
+        <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+        <h4>Authentication Required</h4>
+        <input type="password" id="passInput" class="form-control my-3" placeholder="Enter Security Password">
+        <button class="btn btn-primary w-100 fw-bold" onclick="checkPass()">UNLOCK SYSTEM</button>
+        <p id="errMsg" class="text-danger mt-2" style="display:none;">Wrong Password!</p>
+    </div>
+</div>
 
 <div class="loading-overlay" id="loader"><div class="spinner-border text-primary"></div></div>
 
@@ -67,11 +75,10 @@
         </div>
 
         <div class="col-lg-8">
-            <div class="card h-100 shadow-sm watermark-container">
-                <div class="watermark-text">GOVIND SINGH CHOUHAN MAKRANA</div>
+            <div class="card h-100 shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>REGISTRY LIST</span>
-                    <button class="btn btn-sm btn-light text-primary fw-bold" onclick="syncData()"><i class="fas fa-sync"></i> SYNC</button>
+                    <button class="btn btn-sm btn-light text-primary fw-bold" onclick="syncData()"><i class="fas fa-sync-alt"></i> SYNC</button>
                 </div>
                 <div class="card-body">
                     <div class="row g-2 mb-3">
@@ -102,9 +109,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwnAtp8O7J945C43IOUG66ywAAU6Vppnspf_BvJYVh33HG-dCpdzReGRTmptRTLF5JA/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLUOqyDJrTv9FZbBY-UOU6wfbx64rNoIuIMd3ws1Qb8V51SoUqR1vaWq5AHgQqV5ac/exec";
+    const MASTER_PASS = "admin123"; // Apka Password
 
-    // Auto Calc Logic
+    function checkPass() {
+        const val = document.getElementById('passInput').value;
+        if(val === MASTER_PASS) {
+            document.getElementById('authOverlay').style.display = 'none';
+            document.body.style.display = 'block';
+            syncData();
+        } else {
+            document.getElementById('errMsg').style.display = 'block';
+        }
+    }
+
+    // Auto Calc
     ['tFees', 'sFees', 'sro'].forEach(id => {
         document.getElementById(id).addEventListener('input', () => {
             const t = parseFloat(document.getElementById('tFees').value) || 0;
@@ -116,7 +135,7 @@
         });
     });
 
-    // Form Submission
+    // Form Submit
     document.getElementById('regForm').addEventListener('submit', function(e) {
         e.preventDefault();
         document.getElementById('loader').style.display='flex';
@@ -126,11 +145,10 @@
         
         fetch(SCRIPT_URL, { method: 'POST', body: params, mode: 'no-cors' })
         .then(() => { 
-            alert("Entry Sent to Sheet!"); 
+            alert("Record Saved Successfully!"); 
             this.reset(); 
-            setTimeout(syncData, 2000); 
+            setTimeout(syncData, 1500); 
         })
-        .catch(err => alert("Error: " + err))
         .finally(() => document.getElementById('loader').style.display='none');
     });
 
@@ -146,10 +164,10 @@
     }
 
     function deleteEntry(rowId) {
-        if(confirm("Permanent Delete from Excel?")) {
+        if(confirm("Are you sure you want to delete this from Excel?")) {
             document.getElementById('loader').style.display='flex';
             fetch(`${SCRIPT_URL}?action=delete&rowId=${rowId}`, {mode: 'no-cors'})
-            .then(() => { alert("Deleted!"); syncData(); });
+            .then(() => { alert("Record Deleted!"); syncData(); });
         }
     }
 
@@ -157,7 +175,7 @@
         const body = document.getElementById('tBody');
         body.innerHTML = '';
         if(!data || data.length === 0) return;
-        data.reverse().forEach(r => {
+        [...data].reverse().forEach(r => {
             body.innerHTML += `<tr>
                 <td>${String(r.Date).split('T')[0]}</td>
                 <td class="fw-bold">${String(r['Party Name']).toUpperCase()}</td>
@@ -182,7 +200,7 @@
         const ws = XLSX.utils.json_to_sheet(d);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Registry");
-        XLSX.writeFile(wb, "Registry_Data.xlsx");
+        XLSX.writeFile(wb, "Registry_Report.xlsx");
     }
 
     function exportPd() {
@@ -193,16 +211,11 @@
         const body = d.map(r => [r.Date, r.State, r.District, r['Party Name'], r['Document Type'], r['Bank Name'], r['Executer Name'], r['Registry Amount'], r['Society Duty'], r['E-Stamp'], r['Registration Fees'], r['SI/CSI'], r['Total Fees'], r['Sales Person Fees'], r['Office Fees'], r['SRO Expenses'], r['Amount Submission']]);
 
         doc.autoTable({
-            head: head, body: body, startY: 20, theme: 'grid', styles: { fontSize: 5 },
-            didDrawPage: function (data) {
-                doc.setTextColor(200, 200, 200); doc.setFontSize(35); doc.setFont("helvetica", "bold");
-                doc.text("GOVIND SINGH CHOUHAN MAKRANA", doc.internal.pageSize.getWidth()/2, doc.internal.pageSize.getHeight()/2, {align:'center', angle:45});
-            }
+            head: head, body: body, startY: 10, theme: 'grid', styles: { fontSize: 5 },
+            headStyles: { fillColor: [13, 110, 253] }
         });
-        doc.save("REPORT.pdf");
+        doc.save("Registry_Report.pdf");
     }
-
-    window.onload = syncData;
 </script>
 </body>
 </html>
