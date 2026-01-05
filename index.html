@@ -184,25 +184,41 @@
         });
     }
 
-    function applyFilter() {
-    const s = document.getElementById('sDate').value;
-    const e = document.getElementById('eDate').value;
-    if (!s || !e) return syncData();
+    function parseInputDate(val) {
+  // Handles MM/DD/YYYY or YYYY-MM-DD
+  if (val.includes('/')) {
+    const [m, d, y] = val.split('/');
+    return new Date(y, m - 1, d);
+  }
+  // YYYY-MM-DD
+  const [y, m, d] = val.split('-');
+  return new Date(y, m - 1, d);
+}
 
-    const start = new Date(s);
-    const end = new Date(e);
-    end.setHours(23,59,59,999);
+function parseBackendDate(val) {
+  // "1 Jan 2026"
+  const [d, mon, y] = val.split(' ');
+  return new Date(`${mon} ${d}, ${y}`);
+}
 
-    let d = JSON.parse(localStorage.getItem('regData')) || [];
+function applyFilter() {
+  const s = document.getElementById('sDate').value;
+  const e = document.getElementById('eDate').value;
+  if (!s || !e) return syncData();
 
-    d = d.filter(i => {
-        if (!i.Date) return false;
-       const rowDate = new Date(Date.parse(i.Date));
- // handles "1 - Jan - 2026"
-        return rowDate >= start && rowDate <= end;
-    });
+  const start = parseInputDate(s);
+  const end = parseInputDate(e);
+  end.setHours(23, 59, 59, 999);
 
-    render(d);
+  let data = JSON.parse(localStorage.getItem('regData')) || [];
+
+  data = data.filter(i => {
+    if (!i.Date) return false;
+    const rowDate = parseBackendDate(i.Date);
+    return rowDate >= start && rowDate <= end;
+  });
+
+  render(data);
 }
 
 
@@ -240,5 +256,6 @@
 </script>
 </body>
 </html>
+
 
 
