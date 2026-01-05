@@ -117,7 +117,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZxbZeCnN6X4VWrE_ZNMu0gB9Zk8oSdHZNE4DgkOdo28TsqRRgLnI1AtEtSj_Spyg9/exec"; 
+    // REPLACE WITH YOUR ACTUAL URL
+    const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE"; 
     const MASTER_PASS = "admin123";
 
     function checkPass() {
@@ -195,7 +196,6 @@
         let d = JSON.parse(localStorage.getItem('regData')) || [];
         const filtered = d.filter(i => {
             if(!i.Date) return false;
-            // Converting dd/mm/yyyy to yyyy-mm-dd for string comparison
             const p = i.Date.split('/');
             const recordDate = `${p[2]}-${p[1]}-${p[0]}`; 
             return recordDate >= s && recordDate <= e;
@@ -205,9 +205,15 @@
 
     function exportEx() {
         const d = JSON.parse(localStorage.getItem('regData')) || [];
-        const ws = XLSX.utils.json_to_sheet(d);
+        // Ensure export uses clean DD/MM/YYYY
+        const cleanData = d.map(item => {
+            let newItem = {...item};
+            delete newItem.rowId;
+            return newItem;
+        });
+        const ws = XLSX.utils.json_to_sheet(cleanData);
         const wb = XLSX.utils.book_new();
-        XLSUtils.book_append_sheet(wb, ws, "Records");
+        XLSX.utils.book_append_sheet(wb, ws, "Records");
         XLSX.writeFile(wb, "Registry_Data.xlsx");
     }
 
