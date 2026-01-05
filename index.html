@@ -29,13 +29,14 @@
         <h3 class="mb-3">Registry Login</h3>
         <input type="password" id="passInput" class="form-control form-control-lg mb-3 text-center" placeholder="Enter Password">
         <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="checkPass()">UNLOCK SYSTEM</button>
+        <p id="errMsg" class="text-danger mt-3 fw-bold" style="display:none;">Access Denied! Incorrect Password.</p>
     </div>
 </div>
 
 <div class="loading-overlay" id="loader">
     <div class="text-center">
-        <div class="spinner-border text-primary" role="status"></div>
-        <p class="mt-2 fw-bold">Processing...</p>
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+        <p class="mt-2 fw-bold">Syncing Records...</p>
     </div>
 </div>
 
@@ -52,14 +53,22 @@
                             <div class="col-12"><span class="small-label">Party Name</span><input type="text" name="Party Name" class="form-control" required></div>
                             <div class="col-12"><span class="small-label">Document Type</span><input type="text" name="Document Type" class="form-control" required></div>
                             <div class="col-6"><span class="small-label">Bank Name</span><input type="text" name="Bank Name" class="form-control"></div>
+                            <div class="col-6"><span class="small-label">Executer Name</span><input type="text" name="Executer Name" class="form-control"></div>
                             <div class="col-6"><span class="small-label">Phone No.</span><input type="text" name="Phone No." class="form-control"></div>
+                            <div class="col-6"><span class="small-label">Registry Amount</span><input type="number" name="Registry Amount" class="form-control"></div>
+                            <div class="col-6"><span class="small-label">Society Duty</span><input type="number" name="Society Duty" class="form-control"></div>
+                            <div class="col-6"><span class="small-label">Stamp Duty/SC</span><input type="number" name="Stamp Duty/SC" class="form-control"></div>
+                            <div class="col-6"><span class="small-label">Reg. Fees</span><input type="number" name="Registration Fees" class="form-control"></div>
+                            <div class="col-6"><span class="small-label">SI/CSI</span><input type="number" name="SI/CSI" class="form-control"></div>
+                            <div class="col-12"><span class="small-label">Per Challan</span><input type="text" name="Per Challan" class="form-control"></div>
+                            
                             <div class="col-12 calc-box">
                                 <div class="row g-2">
                                     <div class="col-6"><span class="small-label text-primary">Total Fees</span><input type="number" id="tFees" name="Total Fees" class="form-control" required></div>
                                     <div class="col-6"><span class="small-label">Sales Comm.</span><input type="number" id="sFees" name="Sales Person Fees" class="form-control" required></div>
                                     <div class="col-6"><span class="small-label">Office Fees</span><input type="number" id="oFees" name="Office Fees" class="form-control" readonly></div>
                                     <div class="col-6"><span class="small-label">SRO Expenses</span><input type="number" id="sro" name="SRO Expenses" class="form-control"></div>
-                                    <div class="col-12"><span class="small-label text-success">Final Submission</span><input type="number" id="aSub" name="Amount Submission" class="form-control final-amt" readonly></div>
+                                    <div class="col-12"><span class="small-label text-success">Final Submission Amount</span><input type="number" id="aSub" name="Amount Submission" class="form-control final-amt" readonly></div>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100 mt-3 py-2 fw-bold">SAVE TO GOOGLE SHEET</button>
@@ -85,10 +94,12 @@
                             <button class="btn btn-danger" onclick="exportPd()"><i class="fas fa-file-pdf"></i></button>
                         </div>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm text-center align-middle">
+                    <div class="table-responsive" style="max-height: 500px;">
+                        <table class="table table-bordered table-sm table-hover text-center align-middle">
                             <thead class="table-dark">
-                                <tr><th>DATE</th><th>PARTY NAME</th><th>TOTAL</th><th>OFFICE</th><th>SRO</th><th>SUBMIT</th><th>ACTION</th></tr>
+                                <tr>
+                                    <th>DATE</th><th>PARTY NAME</th><th>TOTAL</th><th>OFFICE</th><th>SRO</th><th>SUBMIT</th><th>ACTION</th>
+                                </tr>
                             </thead>
                             <tbody id="tBody" style="font-size: 13px;"></tbody>
                         </table>
@@ -106,7 +117,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyY0QT49IrG3UESQooaaBVqTj3nfPouOueT9CLmmaKkw-SHTjRWp-hbkzqqMGwCkFj_/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDcLRVvVHkVKkhJEu9eS88Q1TINQJyFtYPDuyxu9MVCv9LZ7QeK6nzKbKazqhhCLlJ/exec";
     const MASTER_PASS = "admin123";
 
     function checkPass() {
@@ -115,6 +126,8 @@
             document.getElementById('mainUI').style.display = 'block';
             document.getElementById('footer').style.display = 'block';
             syncData();
+        } else {
+            document.getElementById('errMsg').style.display = 'block';
         }
     }
 
@@ -135,8 +148,13 @@
         const params = new URLSearchParams();
         params.append('action', 'write');
         fd.forEach((v, k) => params.append(k, v.toString().toUpperCase()));
+        
         fetch(SCRIPT_URL, { method: 'POST', body: params, mode: 'no-cors' })
-        .then(() => { alert("Entry Saved!"); this.reset(); syncData(); })
+        .then(() => { 
+            alert("Entry Saved!"); 
+            this.reset(); 
+            setTimeout(syncData, 1000); 
+        })
         .finally(() => document.getElementById('loader').style.display='none');
     });
 
@@ -154,7 +172,7 @@
     function render(data) {
         const body = document.getElementById('tBody');
         body.innerHTML = '';
-        if(!data) return;
+        if(!data || data.length === 0) return;
         [...data].reverse().forEach(r => {
             body.innerHTML += `<tr>
                 <td>${r.Date}</td>
@@ -166,38 +184,30 @@
         });
     }
 
-function applyFilter() {
-    const sVal = document.getElementById('sDate').value;
-    const eVal = document.getElementById('eDate').value;
+    function applyFilter() {
+    const s = document.getElementById('sDate').value;
+    const e = document.getElementById('eDate').value;
+    if (!s || !e) return syncData();
 
-    if (!sVal || !eVal) {
-        syncData();
-        return;
-    }
+    const start = new Date(s);
+    const end = new Date(e);
+    end.setHours(23,59,59,999);
 
-    const start = new Date(sVal).setHours(0,0,0,0);
-    const end   = new Date(eVal).setHours(23,59,59,999);
+    let d = JSON.parse(localStorage.getItem('regData')) || [];
 
-    const data = JSON.parse(localStorage.getItem('regData')) || [];
-
-    const filtered = data.filter(r => {
-        if (!r.Date) return false;
-
-        // 🔑 IMPORTANT LINE (DO NOT CHANGE)
-        const rowDate = new Date(r.Date.replace(/-/g, '')).getTime();
-
+    d = d.filter(i => {
+        if (!i.Date) return false;
+        const rowDate = new Date(i.Date); // handles "1 - Jan - 2026"
         return rowDate >= start && rowDate <= end;
     });
 
-    render(filtered);
+    render(d);
 }
-
 
 
     function exportEx() {
         const d = JSON.parse(localStorage.getItem('regData')) || [];
-        const cleanData = d.map(({rowId, ...rest}) => rest);
-        const ws = XLSX.utils.json_to_sheet(cleanData);
+        const ws = XLSX.utils.json_to_sheet(d);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Records");
         XLSX.writeFile(wb, "Registry_Data.xlsx");
@@ -207,14 +217,21 @@ function applyFilter() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'mm', 'a4');
         const d = JSON.parse(localStorage.getItem('regData')) || [];
-        const head = [['DATE', 'STATE', 'DISTRICT', 'PARTY NAME', 'TOTAL', 'OFFICE', 'SRO', 'SUBMIT']];
-        const body = d.map(r => [r.Date, r.State, r.District, r['Party Name'], r['Total Fees'], r['Office Fees'], r['SRO Expenses'], r['Amount Submission']]);
-        doc.autoTable({ head, body, startY: 15, theme: 'grid' });
+        
+        const head = [['DATE', 'STATE', 'DISTRICT', 'PARTY NAME', 'DOC TYPE', 'BANK', 'EXECUTER', 'REG. AMT', 'TOTAL FEES', 'SALES', 'OFFICE', 'SRO', 'SUBMIT']];
+        const body = d.map(r => [
+            r.Date, r.State, r.District, r['Party Name'], r['Document Type'], 
+            r['Bank Name'], r['Executer Name'], r['Registry Amount'], 
+            r['Total Fees'], r['Sales Person Fees'], r['Office Fees'], 
+            r['SRO Expenses'], r['Amount Submission']
+        ]);
+
+        doc.autoTable({ head, body, startY: 15, theme: 'grid', styles: {fontSize: 8} });
         doc.save("Registry_Report.pdf");
     }
 
     function deleteEntry(id) {
-        if(confirm("Confirm deletion?")) {
+        if(confirm("Confirm deletion from Google Sheets?")) {
             document.getElementById('loader').style.display='flex';
             fetch(`${SCRIPT_URL}?action=delete&rowId=${id}`, {mode: 'no-cors'}).then(() => syncData());
         }
@@ -222,9 +239,3 @@ function applyFilter() {
 </script>
 </body>
 </html>
-
-
-
-
-
-
