@@ -106,7 +106,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwKz01zH2Vv_pXI7i3JXrkuf3cdzUGQeU9qPed4mU4srsssMwM0j6VrPE58WrW3AcUc/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyY0QT49IrG3UESQooaaBVqTj3nfPouOueT9CLmmaKkw-SHTjRWp-hbkzqqMGwCkFj_/exec"; 
     const MASTER_PASS = "admin123";
 
     function checkPass() {
@@ -167,22 +167,25 @@
     }
 
     function applyFilter() {
-        const sVal = document.getElementById('sDate').value; 
-        const eVal = document.getElementById('eDate').value;
-        if(!sVal || !eVal) { syncData(); return; }
+    const sVal = document.getElementById('sDate').value;
+    const eVal = document.getElementById('eDate').value;
 
-        const start = new Date(sVal).setHours(0,0,0,0);
-        const end = new Date(eVal).setHours(23,59,59,999);
-
-        const d = JSON.parse(localStorage.getItem('regData')) || [];
-        const filtered = d.filter(item => {
-            if(!item.Date) return false;
-            const p = item.Date.split('/');
-            const itemTime = new Date(p[2], p[1]-1, p[0]).getTime();
-            return itemTime >= start && itemTime <= end;
-        });
-        render(filtered);
+    if (!sVal || !eVal) {
+        syncData();
+        return;
     }
+
+    document.getElementById('loader').style.display = 'flex';
+
+    fetch(`${SCRIPT_URL}?action=read&startDate=${sVal}&endDate=${eVal}`)
+        .then(res => res.json())
+        .then(json => {
+            localStorage.setItem('regData', JSON.stringify(json.data));
+            render(json.data);
+        })
+        .finally(() => document.getElementById('loader').style.display = 'none');
+}
+
 
     function exportEx() {
         const d = JSON.parse(localStorage.getItem('regData')) || [];
@@ -212,3 +215,4 @@
 </script>
 </body>
 </html>
+
