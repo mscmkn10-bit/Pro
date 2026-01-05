@@ -197,7 +197,8 @@
 
     d = d.filter(i => {
         if (!i.Date) return false;
-        const rowDate = new Date(i.Date); // handles "1 - Jan - 2026"
+       const rowDate = new Date(Date.parse(i.Date));
+ // handles "1 - Jan - 2026"
         return rowDate >= start && rowDate <= end;
     });
 
@@ -239,4 +240,5 @@
 </script>
 </body>
 </html>
+
 
