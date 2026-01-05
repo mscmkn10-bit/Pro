@@ -196,10 +196,15 @@
 }
 
 function parseBackendDate(val) {
+  // Handles:
   // "1 Jan 2026"
+  // "1 - Jan - 2026"
+
+  val = val.replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
   const [d, mon, y] = val.split(' ');
   return new Date(`${mon} ${d}, ${y}`);
 }
+
 
 function applyFilter() {
   const s = document.getElementById('sDate').value;
@@ -256,6 +261,7 @@ function applyFilter() {
 </script>
 </body>
 </html>
+
 
 
 
