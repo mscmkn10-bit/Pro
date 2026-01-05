@@ -177,13 +177,29 @@
 
     document.getElementById('loader').style.display = 'flex';
 
-    fetch(`${SCRIPT_URL}?action=read&startDate=${sVal}&endDate=${eVal}`)
-        .then(res => res.json())
+    const url =
+        SCRIPT_URL +
+        "?action=read" +
+        "&startDate=" + encodeURIComponent(sVal) +
+        "&endDate=" + encodeURIComponent(eVal);
+
+    fetch(url)
+        .then(response => response.json())
         .then(json => {
+            if (!json.data) {
+                render([]);
+                return;
+            }
             localStorage.setItem('regData', JSON.stringify(json.data));
             render(json.data);
         })
-        .finally(() => document.getElementById('loader').style.display = 'none');
+        .catch(err => {
+            console.error("Filter error:", err);
+            alert("Failed to fetch filtered data");
+        })
+        .finally(() => {
+            document.getElementById('loader').style.display = 'none';
+        });
 }
 
 
@@ -215,4 +231,5 @@
 </script>
 </body>
 </html>
+
 
