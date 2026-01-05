@@ -117,8 +117,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    // REPLACE WITH YOUR ACTUAL URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzMBWXIg5xvYlSlMRcZXGpPFPvLbtBSHjIedJU6aHfWV6zCN0Cm6qLYe999_In_ysWe/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZaFE-kL2XJSh04-LbR2XR0OL-U0Wfo3JdQUJCAxw8RvXEPQQHRIjin4jyOkQB2XqB/exec"; 
     const MASTER_PASS = "admin123";
 
     function checkPass() {
@@ -194,23 +193,31 @@
         }
 
         let d = JSON.parse(localStorage.getItem('regData')) || [];
+        
         const filtered = d.filter(i => {
             if(!i.Date) return false;
-            const p = i.Date.split('/');
-            const recordDate = `${p[2]}-${p[1]}-${p[0]}`; 
+            
+            let recordDate = "";
+            
+            // Handle dd/MM/yyyy format (New & Clean)
+            if(i.Date.includes('/')) {
+                const p = i.Date.split('/');
+                recordDate = `${p[2]}-${p[1]}-${p[0]}`; // Convert to yyyy-mm-dd
+            } 
+            // Handle ISO format (Old leftovers)
+            else if(i.Date.includes('-')) {
+                recordDate = i.Date.split('T')[0];
+            }
+            
             return recordDate >= s && recordDate <= e;
         });
+        
         render(filtered);
     }
 
     function exportEx() {
         const d = JSON.parse(localStorage.getItem('regData')) || [];
-        // Ensure export uses clean DD/MM/YYYY
-        const cleanData = d.map(item => {
-            let newItem = {...item};
-            delete newItem.rowId;
-            return newItem;
-        });
+        const cleanData = d.map(({rowId, ...rest}) => rest);
         const ws = XLSX.utils.json_to_sheet(cleanData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Records");
@@ -243,4 +250,3 @@
 </script>
 </body>
 </html>
-
