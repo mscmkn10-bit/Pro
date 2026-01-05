@@ -82,10 +82,7 @@
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>DATABASE RECORDS</span>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-warning fw-bold" onclick="clearLocalCache()">RESET CACHE</button>
-                        <button class="btn btn-sm btn-light text-primary fw-bold" onclick="syncData()">REFRESH</button>
-                    </div>
+                    <button class="btn btn-sm btn-light text-primary fw-bold" onclick="syncData()">REFRESH</button>
                 </div>
                 <div class="card-body">
                     <div class="row g-2 mb-3">
@@ -120,7 +117,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzikAyr-NryGcoD7fkofPLg0AMJ4h3L5JFrLKelkKf1LiczyvO6urUDCKsPYZqwg-r6/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyGuUvjQqiPdSkncDa695NUxHzQ3RsK0nqqg3uYouerFKUeYNVtCC1Bv2vZp5yZh1JM/exec"; 
     const MASTER_PASS = "admin123";
 
     function checkPass() {
@@ -132,12 +129,6 @@
         } else {
             document.getElementById('errMsg').style.display = 'block';
         }
-    }
-
-    function clearLocalCache() {
-        localStorage.removeItem('regData');
-        alert("Local Cache Cleared. Click Refresh to get new data.");
-        syncData();
     }
 
     ['tFees', 'sFees', 'sro'].forEach(id => {
@@ -182,7 +173,11 @@
         const body = document.getElementById('tBody');
         body.innerHTML = '';
         if(!data || data.length === 0) return;
-        [...data].reverse().forEach(r => {
+        
+        // Reverse data to show latest at top
+        const displayData = [...data].reverse();
+        
+        displayData.forEach(r => {
             body.innerHTML += `<tr>
                 <td>${r.Date}</td>
                 <td class="fw-bold">${r['Party Name']}</td>
@@ -194,43 +189,36 @@
     }
 
     function applyFilter() {
-        const startDateStr = document.getElementById('sDate').value; 
-        const endDateStr = document.getElementById('eDate').value;
-
-        if(!startDateStr || !endDateStr) {
-            alert("Please select both dates.");
+        const sVal = document.getElementById('sDate').value; // yyyy-mm-dd
+        const eVal = document.getElementById('eDate').value; // yyyy-mm-dd
+        
+        if(!sVal || !eVal) {
+            syncData();
             return;
         }
 
-        // Convert input dates (yyyy-mm-dd) to Timestamps for comparison
-        const startTimestamp = new Date(startDateStr).setHours(0,0,0,0);
-        const endTimestamp = new Date(endDateStr).setHours(23,59,59,999);
+        const raw = localStorage.getItem('regData');
+        if(!raw) return;
+        const d = JSON.parse(raw);
 
-        let allEntries = JSON.parse(localStorage.getItem('regData')) || [];
-        
-        const filtered = allEntries.filter(item => {
+        const filtered = d.filter(item => {
             if(!item.Date) return false;
             
-            let itemDate;
-            if(item.Date.includes('/')) {
-                // Parse DD/MM/YYYY
-                const parts = item.Date.split('/');
-                itemDate = new Date(parts[2], parts[1]-1, parts[0]);
-            } else {
-                // Parse ISO or other
-                itemDate = new Date(item.Date);
-            }
+            // Standardize item date to yyyy-mm-dd for string comparison
+            let parts = item.Date.split('/');
+            if(parts.length !== 3) return false;
+            let formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
             
-            const itemTime = itemDate.getTime();
-            return itemTime >= startTimestamp && itemTime <= endTimestamp;
+            return formattedDate >= sVal && formattedDate <= eVal;
         });
 
-        if(filtered.length === 0) alert("No records found in this range.");
         render(filtered);
     }
 
     function exportEx() {
-        const d = JSON.parse(localStorage.getItem('regData')) || [];
+        const raw = localStorage.getItem('regData');
+        if(!raw) return;
+        const d = JSON.parse(raw);
         const cleanData = d.map(({rowId, ...rest}) => rest);
         const ws = XLSX.utils.json_to_sheet(cleanData);
         const wb = XLSX.utils.book_new();
@@ -241,7 +229,9 @@
     function exportPd() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'mm', 'a4');
-        const d = JSON.parse(localStorage.getItem('regData')) || [];
+        const raw = localStorage.getItem('regData');
+        if(!raw) return;
+        const d = JSON.parse(raw);
         
         const head = [['DATE', 'STATE', 'DISTRICT', 'PARTY NAME', 'DOC TYPE', 'BANK', 'EXECUTER', 'REG. AMT', 'TOTAL FEES', 'SALES', 'OFFICE', 'SRO', 'SUBMIT']];
         const body = d.map(r => [
@@ -256,7 +246,7 @@
     }
 
     function deleteEntry(id) {
-        if(confirm("Confirm deletion from Google Sheets?")) {
+        if(confirm("Confirm deletion?")) {
             document.getElementById('loader').style.display='flex';
             fetch(`${SCRIPT_URL}?action=delete&rowId=${id}`, {mode: 'no-cors'}).then(() => syncData());
         }
