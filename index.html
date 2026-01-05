@@ -166,7 +166,7 @@
         });
     }
 
-    function applyFilter() {
+function applyFilter() {
     const sVal = document.getElementById('sDate').value;
     const eVal = document.getElementById('eDate').value;
 
@@ -175,32 +175,23 @@
         return;
     }
 
-    document.getElementById('loader').style.display = 'flex';
+    const start = new Date(sVal).setHours(0,0,0,0);
+    const end   = new Date(eVal).setHours(23,59,59,999);
 
-    const url =
-        SCRIPT_URL +
-        "?action=read" +
-        "&startDate=" + encodeURIComponent(sVal) +
-        "&endDate=" + encodeURIComponent(eVal);
+    const data = JSON.parse(localStorage.getItem('regData')) || [];
 
-    fetch(url)
-        .then(response => response.json())
-        .then(json => {
-            if (!json.data) {
-                render([]);
-                return;
-            }
-            localStorage.setItem('regData', JSON.stringify(json.data));
-            render(json.data);
-        })
-        .catch(err => {
-            console.error("Filter error:", err);
-            alert("Failed to fetch filtered data");
-        })
-        .finally(() => {
-            document.getElementById('loader').style.display = 'none';
-        });
+    const filtered = data.filter(r => {
+        if (!r.Date) return false;
+
+        // 🔑 IMPORTANT LINE (DO NOT CHANGE)
+        const rowDate = new Date(r.Date.replace(/-/g, '')).getTime();
+
+        return rowDate >= start && rowDate <= end;
+    });
+
+    render(filtered);
 }
+
 
 
     function exportEx() {
@@ -231,6 +222,7 @@
 </script>
 </body>
 </html>
+
 
 
 
