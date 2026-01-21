@@ -119,6 +119,7 @@
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDcLRVvVHkVKkhJEu9eS88Q1TINQJyFtYPDuyxu9MVCv9LZ7QeK6nzKbKazqhhCLlJ/exec";
     const MASTER_PASS = "admin123";
+    let currentTableData = []; // NEW: Variable to hold filtered data
 
     function checkPass() {
         if(document.getElementById('passInput').value === MASTER_PASS) {
@@ -170,6 +171,7 @@
     }
 
     function render(data) {
+        currentTableData = data; // Keep track of what is rendered
         const body = document.getElementById('tBody');
         body.innerHTML = '';
         if(!data || data.length === 0) return;
@@ -185,60 +187,53 @@
     }
 
     function parseInputDate(val) {
-  // Handles MM/DD/YYYY or YYYY-MM-DD
-  if (val.includes('/')) {
-    const [m, d, y] = val.split('/');
-    return new Date(y, m - 1, d);
-  }
-  // YYYY-MM-DD
-  const [y, m, d] = val.split('-');
-  return new Date(y, m - 1, d);
-}
+      if (val.includes('/')) {
+        const [m, d, y] = val.split('/');
+        return new Date(y, m - 1, d);
+      }
+      const [y, m, d] = val.split('-');
+      return new Date(y, m - 1, d);
+    }
 
-function parseBackendDate(val) {
-  // Handles:
-  // "1 Jan 2026"
-  // "1 - Jan - 2026"
+    function parseBackendDate(val) {
+      val = val.replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+      const [d, mon, y] = val.split(' ');
+      return new Date(`${mon} ${d}, ${y}`);
+    }
 
-  val = val.replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
-  const [d, mon, y] = val.split(' ');
-  return new Date(`${mon} ${d}, ${y}`);
-}
+    function applyFilter() {
+      const s = document.getElementById('sDate').value;
+      const e = document.getElementById('eDate').value;
+      if (!s || !e) return syncData();
 
+      const start = parseInputDate(s);
+      const end = parseInputDate(e);
+      end.setHours(23, 59, 59, 999);
 
-function applyFilter() {
-  const s = document.getElementById('sDate').value;
-  const e = document.getElementById('eDate').value;
-  if (!s || !e) return syncData();
+      let data = JSON.parse(localStorage.getItem('regData')) || [];
 
-  const start = parseInputDate(s);
-  const end = parseInputDate(e);
-  end.setHours(23, 59, 59, 999);
+      const filtered = data.filter(i => {
+        if (!i.Date) return false;
+        const rowDate = parseBackendDate(i.Date);
+        return rowDate >= start && rowDate <= end;
+      });
 
-  let data = JSON.parse(localStorage.getItem('regData')) || [];
-
-  data = data.filter(i => {
-    if (!i.Date) return false;
-    const rowDate = parseBackendDate(i.Date);
-    return rowDate >= start && rowDate <= end;
-  });
-
-  render(data);
-}
-
+      render(filtered);
+    }
 
     function exportEx() {
-        const d = JSON.parse(localStorage.getItem('regData')) || [];
-        const ws = XLSX.utils.json_to_sheet(d);
+        // Uses the currently visible data (filtered or full)
+        const ws = XLSX.utils.json_to_sheet(currentTableData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Records");
-        XLSX.writeFile(wb, "Registry_Data.xlsx");
+        XLSX.writeFile(wb, "Registry_Report.xlsx");
     }
 
     function exportPd() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'mm', 'a4');
-        const d = JSON.parse(localStorage.getItem('regData')) || [];
+        // Uses the currently visible data
+        const d = currentTableData;
         
         const head = [['DATE', 'STATE', 'DISTRICT', 'PARTY NAME', 'DOC TYPE', 'BANK', 'EXECUTER', 'REG. AMT', 'TOTAL FEES', 'SALES', 'OFFICE', 'SRO', 'SUBMIT']];
         const body = d.map(r => [
@@ -261,7 +256,3 @@ function applyFilter() {
 </script>
 </body>
 </html>
-
-
-
-
